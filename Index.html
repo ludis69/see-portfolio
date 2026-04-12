@@ -1,0 +1,1077 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>S.E.E. Portfolio</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+:root {
+  --bg: #0D0F14;
+  --bg2: #151820;
+  --bg3: #1C2030;
+  --card: #181C28;
+  --card-border: rgba(0,200,255,0.12);
+  --cyan: #00C8FF;
+  --cyan-dim: rgba(0,200,255,0.15);
+  --orange: #FF9500;
+  --orange-dim: rgba(255,149,0,0.15);
+  --green: #30D158;
+  --green-dim: rgba(48,209,88,0.12);
+  --purple: #BF5AF2;
+  --purple-dim: rgba(191,90,242,0.12);
+  --text: #E8EBF0;
+  --text2: #8A9BB0;
+  --text3: #4A5568;
+  --danger: #FF453A;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* TOPBAR */
+.topbar {
+  position: sticky; top: 0; z-index: 100;
+  background: rgba(13,15,20,0.92);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 0.5px solid var(--card-border);
+  padding: env(safe-area-inset-top, 12px) 16px 12px;
+  display: flex; align-items: center; gap: 10px;
+  min-height: 56px;
+}
+.topbar-back {
+  background: none; border: none; cursor: pointer;
+  font-size: 24px; color: var(--cyan); padding: 4px 8px 4px 0;
+  display: none; line-height: 1;
+}
+.topbar-back.visible { display: block; }
+.topbar-titles { flex: 1; min-width: 0; }
+.topbar-title {
+  font-size: 16px; font-weight: 700;
+  color: var(--cyan);
+  letter-spacing: 0.02em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.topbar-sub { font-size: 11px; color: var(--text2); margin-top: 2px; letter-spacing: 0.04em; text-transform: uppercase; }
+.topbar-refresh {
+  background: none; border: none; cursor: pointer;
+  font-size: 18px; color: var(--cyan); padding: 6px;
+  line-height: 1; opacity: 0.8;
+}
+.topbar-logo {
+  font-size: 13px; font-weight: 800; letter-spacing: 0.1em;
+  color: var(--text2);
+}
+
+/* SEARCH */
+.search-wrap {
+  background: rgba(13,15,20,0.88);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  padding: 10px 16px;
+  border-bottom: 0.5px solid var(--card-border);
+  position: sticky; top: 56px; z-index: 99;
+}
+.search-input {
+  width: 100%;
+  background: var(--bg3);
+  border: 0.5px solid var(--card-border);
+  border-radius: 10px;
+  padding: 9px 14px 9px 36px;
+  font-size: 15px; color: var(--text);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2300C8FF' stroke-width='2' opacity='0.5'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: 12px center;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input:focus { border-color: rgba(0,200,255,0.4); }
+.search-input::placeholder { color: var(--text3); }
+
+/* SCREENS */
+.screen { display: none; }
+.screen.active { display: block; }
+
+/* ANALISTA CARD */
+.list { padding: 12px 14px; display: flex; flex-direction: column; gap: 8px; }
+
+.analista-card {
+  background: var(--card);
+  border: 0.5px solid var(--card-border);
+  border-radius: 14px;
+  padding: 14px 16px;
+  display: flex; align-items: center; gap: 14px;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  position: relative; overflow: hidden;
+}
+.analista-card::before {
+  content: '';
+  position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+  background: var(--cyan);
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.analista-card:active { background: var(--bg3); border-color: rgba(0,200,255,0.3); }
+.analista-card:active::before { opacity: 1; }
+
+.avatar {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px; font-weight: 700; flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+.av-cyan   { background: rgba(0,200,255,0.15);   color: var(--cyan); border: 0.5px solid rgba(0,200,255,0.25); }
+.av-orange { background: rgba(255,149,0,0.15);   color: var(--orange); border: 0.5px solid rgba(255,149,0,0.25); }
+.av-green  { background: rgba(48,209,88,0.15);   color: var(--green); border: 0.5px solid rgba(48,209,88,0.25); }
+.av-purple { background: rgba(191,90,242,0.15);  color: var(--purple); border: 0.5px solid rgba(191,90,242,0.25); }
+.av-red    { background: rgba(255,69,58,0.15);   color: var(--danger); border: 0.5px solid rgba(255,69,58,0.25); }
+.av-teal   { background: rgba(90,200,250,0.15);  color: #5AC8FA; border: 0.5px solid rgba(90,200,250,0.25); }
+.av-yellow { background: rgba(255,214,10,0.15);  color: #FFD60A; border: 0.5px solid rgba(255,214,10,0.25); }
+
+.analista-info { flex: 1; min-width: 0; }
+.analista-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.analista-count { font-size: 12px; color: var(--text2); margin-top: 3px; }
+.chevron { color: var(--text3); font-size: 16px; }
+
+/* CLIENTE CARD */
+.cliente-card {
+  background: var(--card);
+  border: 0.5px solid var(--card-border);
+  border-radius: 14px;
+  padding: 14px 16px; cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+}
+.cliente-card:active { background: var(--bg3); border-color: rgba(0,200,255,0.3); }
+.cliente-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+.cliente-rs { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.3; }
+.cliente-pod { font-size: 11px; color: var(--cyan); margin-top: 4px; font-family: monospace; opacity: 0.8; letter-spacing: 0.04em; }
+.badge { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 6px; flex-shrink: 0; letter-spacing: 0.06em; }
+.badge-mt  { background: rgba(0,200,255,0.15); color: var(--cyan); border: 0.5px solid rgba(0,200,255,0.3); }
+.badge-bt  { background: rgba(48,209,88,0.15); color: var(--green); border: 0.5px solid rgba(48,209,88,0.3); }
+.badge-gas { background: rgba(255,149,0,0.15); color: var(--orange); border: 0.5px solid rgba(255,149,0,0.3); }
+.cliente-meta { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; border-top: 0.5px solid rgba(255,255,255,0.05); padding-top: 10px; }
+.meta-item { font-size: 11px; color: var(--text2); }
+.meta-val { font-weight: 600; color: var(--text); }
+
+/* POD SHEET */
+.pod-header {
+  background: var(--bg2);
+  padding: 16px;
+  border-bottom: 0.5px solid var(--card-border);
+  margin-bottom: 12px;
+}
+.pod-rs { font-size: 18px; font-weight: 700; color: var(--text); line-height: 1.3; }
+.pod-code { font-size: 12px; color: var(--cyan); font-family: monospace; margin-top: 6px; opacity: 0.85; letter-spacing: 0.05em; }
+.pod-meta { font-size: 11px; color: var(--text2); margin-top: 4px; }
+
+.section {
+  background: var(--card);
+  border: 0.5px solid var(--card-border);
+  border-radius: 14px;
+  margin: 0 14px 10px;
+  overflow: hidden;
+}
+.section-title {
+  font-size: 10px; font-weight: 700; color: var(--text2);
+  padding: 10px 16px 8px;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  border-bottom: 0.5px solid rgba(255,255,255,0.05);
+}
+.kv-grid { display: grid; grid-template-columns: 1fr 1fr; }
+.kv {
+  padding: 11px 16px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.04);
+  border-right: 0.5px solid rgba(255,255,255,0.04);
+}
+.kv:nth-child(even) { border-right: none; }
+.kv:nth-last-child(-n+2) { border-bottom: none; }
+.kv-label { font-size: 10px; color: var(--text2); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.kv-val { font-size: 14px; font-weight: 600; color: var(--text); }
+.kv-val.price { color: var(--cyan); font-family: monospace; }
+.kv-val.highlight { color: var(--green); }
+
+/* PREZZI */
+.prezzo-row {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 16px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.04);
+}
+.prezzo-row:last-child { border-bottom: none; }
+.fascia-badge {
+  width: 30px; height: 30px; border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800; flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+.fb-f1 { background: rgba(0,200,255,0.15); color: var(--cyan); border: 0.5px solid rgba(0,200,255,0.3); }
+.fb-f2 { background: rgba(48,209,88,0.15); color: var(--green); border: 0.5px solid rgba(48,209,88,0.3); }
+.fb-f3 { background: rgba(255,149,0,0.15); color: var(--orange); border: 0.5px solid rgba(255,149,0,0.3); }
+.prezzo-text { font-size: 14px; color: var(--text); font-family: monospace; line-height: 1.5; word-break: break-word; flex: 1; }
+
+.pun-banner {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 16px;
+  background: rgba(191,90,242,0.08);
+  border-bottom: 0.5px solid rgba(191,90,242,0.2);
+}
+.pun-tag {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.08em;
+  background: rgba(191,90,242,0.2); color: var(--purple);
+  border: 0.5px solid rgba(191,90,242,0.4);
+  padding: 3px 8px; border-radius: 6px; white-space: nowrap;
+}
+.pun-formula { font-size: 15px; color: var(--purple); font-family: monospace; font-weight: 700; }
+
+/* CONSUMI */
+.consumo-row { padding: 10px 16px; }
+.consumo-header {
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;
+}
+.consumo-left { display: flex; align-items: center; gap: 8px; }
+.consumo-kwh { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.01em; }
+.consumo-pct { font-size: 14px; font-weight: 700; }
+.bar-track { height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; }
+.bar-f1 { background: var(--cyan); }
+.bar-f2 { background: var(--green); }
+.bar-f3 { background: var(--orange); }
+.consumo-totals {
+  display: flex; border-top: 0.5px solid rgba(255,255,255,0.05);
+  margin: 4px 16px 0;
+}
+.consumo-total-item { flex: 1; padding: 12px 0; text-align: center; }
+.consumo-total-item + .consumo-total-item { border-left: 0.5px solid rgba(255,255,255,0.05); }
+.ct-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+.ct-val { font-size: 16px; font-weight: 700; color: var(--cyan); }
+
+/* ALTRI DATI */
+.raw-row {
+  display: flex; justify-content: space-between; align-items: flex-start;
+  gap: 12px; padding: 10px 16px;
+  border-bottom: 0.5px solid rgba(255,255,255,0.04);
+}
+.raw-row:last-child { border-bottom: none; }
+.raw-key { font-size: 13px; color: var(--text2); }
+.raw-val { font-size: 13px; font-weight: 600; color: var(--text); text-align: right; max-width: 55%; word-break: break-word; }
+
+/* STATI */
+.state-msg {
+  text-align: center; padding: 60px 24px;
+  color: var(--text2); font-size: 14px; line-height: 1.7;
+}
+.spinner {
+  width: 28px; height: 28px;
+  border: 2px solid rgba(0,200,255,0.15);
+  border-top-color: var(--cyan);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 16px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.error-card {
+  background: rgba(255,69,58,0.08);
+  border: 0.5px solid rgba(255,69,58,0.3);
+  border-radius: 14px; margin: 16px; padding: 16px;
+  font-size: 13px; color: #FF6B63; line-height: 1.7;
+}
+.error-card strong { display: block; margin-bottom: 8px; font-size: 14px; color: var(--danger); }
+.error-card ul { margin: 8px 0 0 16px; }
+.error-card a { color: var(--cyan); }
+
+.bottom-pad { height: calc(env(safe-area-inset-bottom, 0px) + 24px); }
+
+.tab-btn {
+  flex: 1; padding: 7px 12px; font-size: 12px; font-weight: 600;
+  border-radius: 8px; border: 0.5px solid var(--card-border);
+  background: transparent; color: var(--text2); cursor: pointer;
+  letter-spacing: 0.03em; transition: all 0.15s;
+}
+.tab-btn.active {
+  background: var(--cyan); color: #000; border-color: var(--cyan);
+}
+
+.filter-select {
+  flex: 1; min-width: 100px;
+  background: var(--bg3); border: 0.5px solid var(--card-border);
+  border-radius: 8px; padding: 6px 10px;
+  font-size: 12px; color: var(--text); outline: none;
+  cursor: pointer;
+}
+
+.note-box {
+  background: var(--bg3); border: 0.5px solid rgba(255,214,10,0.3);
+  border-radius: 10px; padding: 10px 12px; margin: 10px 14px 0;
+  position: relative;
+}
+.note-label {
+  font-size: 10px; font-weight: 700; color: #FFD60A;
+  text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;
+}
+.note-textarea {
+  width: 100%; background: transparent; border: none;
+  color: var(--text); font-size: 13px; line-height: 1.5;
+  resize: none; outline: none; min-height: 60px;
+  font-family: inherit;
+}
+.note-save-btn {
+  font-size: 11px; font-weight: 600; color: #FFD60A;
+  background: none; border: none; cursor: pointer;
+  padding: 0; margin-top: 4px;
+}
+.note-warning {
+  font-size: 10px; color: var(--text3); margin-top: 4px;
+}
+
+.share-bar {
+  display: flex; gap: 8px; padding: 12px 14px 0;
+}
+.share-btn {
+  flex: 1; padding: 10px 8px; border-radius: 10px;
+  border: 0.5px solid var(--card-border);
+  background: var(--card); color: var(--text2);
+  font-size: 12px; font-weight: 600; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  transition: background 0.15s;
+}
+.share-btn:active { background: var(--bg3); }
+
+.kpi-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+  padding: 12px 14px;
+}
+.kpi-card {
+  background: var(--card); border: 0.5px solid var(--card-border);
+  border-radius: 12px; padding: 12px 14px;
+}
+.kpi-label { font-size: 10px; color: var(--text2); text-transform: uppercase; letter-spacing: 0.07em; margin-bottom: 4px; }
+.kpi-val { font-size: 20px; font-weight: 700; color: var(--cyan); }
+.kpi-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+
+/* Header decorativo */
+.app-header {
+  padding: 16px 16px 8px;
+  display: flex; align-items: center; gap: 12px;
+}
+.see-logo-text {
+  font-size: 22px; font-weight: 900; letter-spacing: 0.08em;
+  background: linear-gradient(90deg, var(--cyan), #5AC8FA);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+}
+.see-dot { color: var(--orange); -webkit-text-fill-color: var(--orange); }
+.header-sub { font-size: 10px; color: var(--text2); letter-spacing: 0.1em; text-transform: uppercase; margin-top: 2px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="topbar-back" id="btnBack" onclick="goBack()">&#x2039;</button>
+  <img id="topLogo" src="data:image/png;base64,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" alt="S.E.E." style="height:44px;width:auto;border-radius:8px;flex-shrink:0;object-fit:contain;background:#D6EAF8;padding:4px 8px;" />
+  <div class="topbar-titles">
+    <div class="topbar-title" id="topTitle">S.E.E. Portfolio</div>
+    <div class="topbar-sub" id="topSub">Connessione in corso...</div>
+  </div>
+  <button class="topbar-refresh" onclick="loadData()" title="Ricarica">&#x21BB;</button>
+</div>
+
+<!-- SCREEN: ANALISTI -->
+<div class="screen active" id="screenAnalisti">
+  <div class="search-wrap">
+    <div style="display:flex;gap:8px;margin-bottom:8px">
+      <button class="tab-btn active" id="tabAnalisti" onclick="switchTab('analisti')">Analisti</button>
+      <button class="tab-btn" id="tabGlobale" onclick="switchTab('globale')">Ricerca globale</button>
+    </div>
+    <input class="search-input" type="search" placeholder="Cerca analista..."
+      oninput="onSearchAnalisti(this.value)" id="searchAnalista" autocomplete="off"/>
+  </div>
+  <div id="listAnalisti">
+    <div class="state-msg"><div class="spinner"></div>Connessione a Google Sheets...</div>
+  </div>
+</div>
+
+<!-- SCREEN: CLIENTI -->
+<div class="screen" id="screenClienti">
+  <div class="search-wrap">
+    <input class="search-input" type="search" placeholder="Cerca cliente o POD..."
+      oninput="filterClienti(this.value)" id="searchCliente" autocomplete="off"/>
+    <div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap" id="filtriClienti">
+      <select class="filter-select" id="filtroFornitore" onchange="filterClienti(document.getElementById('searchCliente').value)">
+        <option value="">Tutti i fornitori</option>
+      </select>
+      <select class="filter-select" id="filtroTensione" onchange="filterClienti(document.getElementById('searchCliente').value)">
+        <option value="">MT + BT</option>
+        <option value="MT">Solo MT</option>
+        <option value="BT">Solo BT</option>
+        <option value="Gas">Solo Gas</option>
+      </select>
+      <select class="filter-select" id="filtroOrdine" onchange="filterClienti(document.getElementById('searchCliente').value)">
+        <option value="rs">A→Z nome</option>
+        <option value="consumo_desc">Consumo ↓</option>
+        <option value="consumo_asc">Consumo ↑</option>
+        <option value="fornitore">Fornitore</option>
+      </select>
+    </div>
+  </div>
+  <div id="listClienti"></div>
+</div>
+
+<!-- SCREEN: POD -->
+<div class="screen" id="screenPod">
+  <div id="podContent"></div>
+</div>
+
+<script>
+
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyuxwDitGvcmCDttEOd3VpKtREAlN69xKJ25RMw7pusM5_iC1Z_G73z914UJBtiRA2_Bw/exec';
+const COLORS = ['av-cyan','av-orange','av-green','av-purple','av-red','av-teal','av-yellow'];
+let allData=[], currentAnalista=null, clientiAnalista=[], navHistory=['analisti'], cbN=0;
+
+function jsonp(url) {
+  // Prima tenta fetch normale (funziona da Netlify e browser moderni)
+  return fetch(url + '?token=4mNddiqjaC2RcUKpssC7gHWJg5ASch0M8-xG3WAWfPk&t=' + Date.now())
+    .then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .catch(function(fetchErr) {
+      // Fallback JSONP se fetch fallisce (es. CORS bloccato)
+      return new Promise(function(resolve, reject) {
+        var cb = '__cb' + (++cbN);
+        var s = document.createElement('script');
+        var t = setTimeout(function(){ cleanup(); reject(new Error('Timeout — lo script non ha risposto.')); }, 20000);
+        window[cb] = function(d){ cleanup(); resolve(d); };
+        function cleanup(){ clearTimeout(t); delete window[cb]; if(s.parentNode) s.parentNode.removeChild(s); }
+        s.onerror = function(){ cleanup(); reject(new Error('Script non raggiungibile. Controlla la connessione internet.')); };
+        s.src = url + '?token=4mNddiqjaC2RcUKpssC7gHWJg5ASch0M8-xG3WAWfPk&callback=' + cb + '&t=' + Date.now();
+        document.head.appendChild(s);
+      });
+    });
+}
+
+function avatarInitials(n){ return n.split(/\s+/).slice(0,2).map(w=>w[0]||'').join('').toUpperCase()||'?'; }
+function avatarColor(n){ let h=0; for(let c of n) h=(h*31+c.charCodeAt(0))%COLORS.length; return COLORS[h]; }
+
+function detect(row, keys) {
+  for(let k of keys){ if(row[k]!==undefined && row[k]!=='') return row[k]; }
+  for(let k of keys){ const f=Object.keys(row).find(r=>r.includes(k)); if(f&&row[f]) return row[f]; }
+  return '';
+}
+
+const gA = r=>detect(r,['analista','account','responsabile','gestore']);
+const gRS= r=>detect(r,['ragione_sociale','ragione','cliente','societa','nominativo','intestatario']);
+const gP = r=>detect(r,['pod','punto_di_fornitura','codice_pod','pdr']);
+const gT = r=>detect(r,['tensione','livello_tensione','tipo_tensione','tipo_fornitura','tipo']);
+const gFU= r=>detect(r,['fornitore_uscente','fornitore_attuale','fornitore_corrente']);
+const gFN= r=>detect(r,['fornitore_nuovo','nuovo_fornitore','prossimo_fornitore','fornitore']);
+const gSc= r=>detect(r,['data_inizio_fornitura','scadenza','fine_contratto','data_scadenza']);
+const gCo= r=>detect(r,['consumi_annuali_totale','consumo_annuo','consumo','energia_annua','kwh']);
+const gPo= r=>detect(r,['potenza_disponibile','potenza_impegnata','potenza','kw']);
+const gF1= r=>detect(r,['prezzi_f1','prezzo_f1','f1','fascia_f1','energia_f1']);
+const gF2= r=>detect(r,['prezzi_f2','prezzo_f2','f2','fascia_f2','energia_f2']);
+const gF3= r=>detect(r,['prezzi_f3','prezzo_f3','f3','fascia_f3','energia_f3']);
+const gPF= r=>detect(r,['prezzi_fisso','prezzo_fisso','quota_fissa','fisso','fix']);
+const gPP= r=>detect(r,['perc_pun_q1','perc_pun_q2','perc_pun','percentuale_pun','pun']);
+const gQF= r=>detect(r,['perc_fix_q1','perc_fix_q2','quota_fissa','fix','fisso']);
+const gInd=r=>detect(r,['indirizzo_fornitura','indirizzo','via','sede']);
+const gDU= r=>detect(r,['data_ultimo_inserimento','data_inserimento','ultimo_aggiornamento']);
+const gCF1=r=>detect(r,['f1_12_mesi','consumo_f1','f1_annuo','kwh_f1','f1_mesi']);
+const gCF2=r=>detect(r,['f2_12_mesi','consumo_f2','f2_annuo','kwh_f2','f2_mesi']);
+const gCF3=r=>detect(r,['f3_12_mesi','consumo_f3','f3_annuo','kwh_f3','f3_mesi']);
+
+function fmtKwh(v){
+  if(!v || v==='') return null;
+  const n = parseFloat(String(v).replace(',','.'));
+  return isNaN(n) ? null : Math.round(n);
+}
+function fmtKwhStr(v){
+  const n = fmtKwh(v);
+  return n===null ? '—' : n.toLocaleString('it');
+}
+
+const USED_KEYS = ['analista','account','responsabile','gestore',
+  'ragione_sociale','ragione','cliente','societa','nominativo','intestatario',
+  'pod','punto_di_fornitura','codice_pod','pdr',
+  'tensione','livello_tensione','tipo_tensione','tipo_fornitura','tipo',
+  'fornitore_uscente','fornitore_attuale','fornitore_corrente',
+  'fornitore_nuovo','nuovo_fornitore','prossimo_fornitore','fornitore',
+  'data_inizio_fornitura','scadenza','fine_contratto','data_scadenza',
+  'consumi_annuali_totale','consumo_annuo','consumo','energia_annua','kwh',
+  'potenza_disponibile','potenza_impegnata','potenza','kw',
+  'prezzi_f1','prezzo_f1','f1','fascia_f1','energia_f1',
+  'prezzi_f2','prezzo_f2','f2','fascia_f2','energia_f2',
+  'prezzi_f3','prezzo_f3','f3','fascia_f3','energia_f3',
+  'prezzi_fisso','prezzo_fisso','quota_fissa','fisso','fix',
+  'perc_pun_q1','perc_pun_q2','perc_pun','percentuale_pun','pun',
+  'perc_fix_q1','perc_fix_q2',
+  'indirizzo_fornitura','indirizzo','via','sede',
+  'data_ultimo_inserimento','data_inserimento','ultimo_aggiornamento',
+  'consumi_mensili','f1_12_mesi','f2_12_mesi','f3_12_mesi',
+  'f1_mesi','f2_mesi','f3_mesi','consumo_f1','consumo_f2','consumo_f3','f1_annuo','f2_annuo','f3_annuo','kwh_f1','kwh_f2','kwh_f3'];
+
+async function loadData(){
+  document.getElementById('topSub').textContent='Connessione in corso...';
+  document.getElementById('listAnalisti').innerHTML='<div class="state-msg"><div class="spinner"></div>Connessione a Google Sheets...</div>';
+  try {
+    const data = await jsonp(SCRIPT_URL);
+    if(data.error) throw new Error(data.error);
+    allData = data.righe||[];
+    if(!allData.length) throw new Error('Il foglio è vuoto o non contiene righe dati.');
+    document.getElementById('topSub').textContent=allData.length.toLocaleString('it')+' record';
+    renderAnalisti();
+  } catch(e) {
+    document.getElementById('topSub').textContent='Errore di connessione';
+    document.getElementById('listAnalisti').innerHTML=
+      `<div class="error-card">
+        <strong>Errore: ${e.message}</strong>
+        <ul>
+          <li>Verifica di avere connessione internet</li>
+          <li>Controlla che il deployment sia attivo con accesso "Chiunque"</li>
+          <li><a href="${SCRIPT_URL}?callback=test" target="_blank">Testa lo script nel browser</a></li>
+        </ul>
+      </div>`;
+  }
+}
+
+function renderAnalisti(filter){
+  filter = filter || '';
+  var map={};
+  allData.forEach(function(r){ var a=gA(r); if(a){ map[a]=(map[a]||0)+1; } });
+  var list=Object.entries(map)
+    .filter(function(e){ return e[0].toLowerCase().indexOf(filter.toLowerCase()) !== -1; })
+    .sort(function(a,b){ return a[0].localeCompare(b[0],'it'); });
+  if(!list.length){
+    document.getElementById('listAnalisti').innerHTML='<div class="state-msg">Nessun analista trovato</div>';
+    return;
+  }
+  var container = document.createElement('div');
+  container.className = 'list';
+  list.forEach(function(entry){
+    var nome = entry[0], count = entry[1];
+    var card = document.createElement('div');
+    card.className = 'analista-card';
+    card.onclick = (function(n){ return function(){ selectAnalista(n); }; })(nome);
+    var html = '';
+    html += '<div class="avatar ' + avatarColor(nome) + '">' + avatarInitials(nome) + '</div>';
+    html += '<div class="analista-info">';
+    html += '<div class="analista-name">' + nome + '</div>';
+    html += '<div class="analista-count">' + count + ' client' + (count===1?'e':'i') + '</div>';
+    html += '</div>';
+    html += '<span class="chevron">&#x203A;</span>';
+    card.innerHTML = html;
+    container.appendChild(card);
+  });
+  var listEl = document.getElementById('listAnalisti');
+  listEl.innerHTML = '';
+  listEl.appendChild(container);
+}
+
+function filterAnalisti(v){ renderAnalisti(v); }
+
+function selectAnalista(nome){
+  currentAnalista=nome;
+  clientiAnalista=allData.filter(r=>gA(r)===nome);
+  navHistory.push('clienti');
+  document.getElementById('topTitle').textContent=nome;
+  document.getElementById('topSub').textContent=clientiAnalista.length+' client'+(clientiAnalista.length===1?'e':'i');
+  document.getElementById('btnBack').classList.add('visible');
+  document.getElementById('searchCliente').value='';
+  renderClienti();
+  switchScreen('screenClienti');
+  window.scrollTo(0,0);
+}
+
+function renderClienti(filter){
+  filter = filter || '';
+  var fl = filter.toLowerCase();
+  var filtroF = document.getElementById('filtroFornitore') ? document.getElementById('filtroFornitore').value : '';
+  var filtroT = document.getElementById('filtroTensione') ? document.getElementById('filtroTensione').value : '';
+  var ordine  = document.getElementById('filtroOrdine')   ? document.getElementById('filtroOrdine').value   : 'rs';
+
+  var rows = clientiAnalista.filter(function(r){
+    if(fl && (gRS(r)+' '+gP(r)+' '+gFN(r)).toLowerCase().indexOf(fl) === -1) return false;
+    if(filtroF && (gFN(r)||gFU(r)) !== filtroF) return false;
+    if(filtroT){
+      var t = gT(r).toUpperCase(), p = gP(r).toUpperCase();
+      var isMT  = t.indexOf('MT')!==-1 || t.indexOf('MEDIA')!==-1;
+      var isGas = t.indexOf('GAS')!==-1 || p.indexOf('PDR')===0;
+      var isBT  = !isMT && !isGas;
+      if(filtroT==='MT'  && !isMT)  return false;
+      if(filtroT==='BT'  && !isBT)  return false;
+      if(filtroT==='Gas' && !isGas) return false;
+    }
+    return true;
+  });
+
+  // Ordinamento
+  rows.sort(function(a,b){
+    if(ordine==='consumo_desc'){
+      return (parseFloat(gCo(b))||0)-(parseFloat(gCo(a))||0);
+    } else if(ordine==='consumo_asc'){
+      return (parseFloat(gCo(a))||0)-(parseFloat(gCo(b))||0);
+    } else if(ordine==='fornitore'){
+      return (gFN(a)||gFU(a)).localeCompare(gFN(b)||gFU(b),'it');
+    }
+    return gRS(a).localeCompare(gRS(b),'it');
+  });
+  if(!rows.length){
+    document.getElementById('listClienti').innerHTML='<div class="state-msg">Nessun cliente trovato</div>';
+    return;
+  }
+  var container = document.createElement('div');
+  container.className = 'list';
+  rows.forEach(function(row){
+    var rs = gRS(row)||'(senza ragione sociale)';
+    var pod = gP(row)||'—';
+    var tens = gT(row);
+    var fu = gFU(row), fn = gFN(row);
+    var consumo = gCo(row), potenza = gPo(row);
+    var isMT = tens.toUpperCase().indexOf('MT') !== -1 || tens.toUpperCase().indexOf('MEDIA') !== -1;
+    var isGas = tens.toUpperCase().indexOf('GAS') !== -1 || pod.indexOf('PDR') === 0;
+    var bc = isMT ? 'badge-mt' : isGas ? 'badge-gas' : 'badge-bt';
+    var bl = tens || (isGas ? 'Gas' : 'BT');
+    var cambio = fn && fu && fn !== fu;
+    var allDataIdx = allData.indexOf(row);
+
+    var card = document.createElement('div');
+    card.className = 'cliente-card';
+    card.onclick = (function(i){ return function(){ openPod(i); }; })(allDataIdx);
+
+    var html = '';
+    html += '<div class="cliente-header">';
+    html += '<div style="flex:1;min-width:0">';
+    html += '<div class="cliente-rs">' + rs + '</div>';
+    html += '<div class="cliente-pod">' + pod + '</div>';
+    html += '</div>';
+    html += '<span class="badge ' + bc + '">' + bl + '</span>';
+    html += '</div>';
+    html += '<div class="cliente-meta">';
+    if(fu) html += '<div class="meta-item">Attuale: <span class="meta-val">' + fu + '</span></div>';
+    if(cambio) html += '<div class="meta-item">Nuovo: <span class="meta-val" style="color:var(--green)">' + fn + '</span></div>';
+    if(consumo) html += '<div class="meta-item">Consumo: <span class="meta-val">' + Number(String(consumo).replace(/[^\d]/g,'')).toLocaleString('it') + ' kWh</span></div>';
+    if(potenza) html += '<div class="meta-item">Potenza: <span class="meta-val">' + potenza + ' kW</span></div>';
+    html += '</div>';
+    card.innerHTML = html;
+    container.appendChild(card);
+  });
+  var list = document.getElementById('listClienti');
+  list.innerHTML = '';
+  list.appendChild(container);
+}
+
+function filterClienti(v){ renderClienti(v); }
+
+function fmtNum(v){
+  if(!v) return '—';
+  const n=parseFloat(String(v).replace(',','.'));
+  return isNaN(n)?v:n.toLocaleString('it',{minimumFractionDigits:0,maximumFractionDigits:5});
+}
+
+function isPunFormula(v){
+  if(!v || v==='') return false;
+  return /PUN|pun/i.test(String(v));
+}
+
+function normalizePrezzi(row){
+  var rawF1 = detect(row,['prezzi_f1','prezzo_f1','f1','fascia_f1']);
+  var rawF2 = detect(row,['prezzi_f2','prezzo_f2','f2','fascia_f2']);
+  var rawF3 = detect(row,['prezzi_f3','prezzo_f3','f3','fascia_f3']);
+  var rawQF = detect(row,['prezzi_fisso','prezzo_fisso','quota_fissa','fisso','fix']);
+  var rawPP = detect(row,['perc_pun_q1','perc_pun_q2','perc_pun','percentuale_pun']);
+
+  if(isPunFormula(rawF1)){
+    // Modalità altri analisti: J=formula PUN, K=F1 fisso, L=F2 fisso, M=F3 fisso
+    return { mode:'standard', punFormula:rawF1, f1:rawF2, f2:rawF3, f3:rawQF, quotaFissa:'', percPun:rawPP };
+  } else {
+    // Modalità Chiara: J=prezzo gen, K/L/M=formule miste → tutto testo
+    return { mode:'chiara', punFormula:'', f1:rawF1, f2:rawF2, f3:rawF3, quotaFissa:rawQF, percPun:rawPP };
+  }
+}
+
+function openPod(idx){
+  const row=allData[idx]; if(!row) return;
+  navHistory.push('pod');
+  const rs=gRS(row)||'(senza ragione sociale)', pod=gP(row)||'—';
+  const tens=gT(row), fu=gFU(row), fn=gFN(row);
+  const scadenza=gSc(row), consumo=gCo(row), potenza=gPo(row), ind=gInd(row);
+  const prez=normalizePrezzi(row);
+  const f1=prez.f1, f2=prez.f2, f3=prez.f3;
+  const pf=prez.quotaFissa, pp=prez.percPun, punFormula=prez.punFormula;
+  const prezMode=prez.mode;
+  const du=gDU(row);
+
+  document.getElementById('topTitle').textContent=rs.length>26?rs.slice(0,26)+'…':rs;
+  document.getElementById('topSub').textContent=pod;
+
+  const extra=Object.entries(row).filter(([k,v])=>{
+    if(!v||v==='') return false;
+    return !USED_KEYS.some(u=>k===u||k.startsWith(u+'_')||k.endsWith('_'+u));
+  });
+
+  let html=`<div class="pod-header">
+    <div class="pod-rs">${rs}</div>
+    <div class="pod-code">${pod}${du?` &nbsp;·&nbsp; agg. ${du}`:''}</div>
+  </div>`;
+
+  // Sezione fornitura
+  const hasForn=tens||fu||fn||scadenza||potenza||consumo||ind;
+  if(hasForn){
+    html+=`<div class="section"><div class="section-title">Fornitura</div><div class="kv-grid">`;
+    if(tens) html+=`<div class="kv"><div class="kv-label">Tensione</div><div class="kv-val">${tens}</div></div>`;
+    if(potenza) html+=`<div class="kv"><div class="kv-label">Potenza</div><div class="kv-val">${potenza} kW</div></div>`;
+    if(scadenza) html+=`<div class="kv"><div class="kv-label">Inizio fornitura</div><div class="kv-val">${scadenza}</div></div>`;
+    if(consumo) html+=`<div class="kv"><div class="kv-label">Consumo annuo</div><div class="kv-val">${Number(String(consumo).replace(/[^\d]/g,'')).toLocaleString('it')} kWh</div></div>`;
+    if(fu) html+=`<div class="kv"><div class="kv-label">Fornitore uscente</div><div class="kv-val">${fu}</div></div>`;
+    if(fn) html+=`<div class="kv"><div class="kv-label">Fornitore nuovo</div><div class="kv-val" style="color:#2D6E10;font-weight:600">${fn}</div></div>`;
+    html+=`</div>`;
+    if(ind){
+      var mapsUrl = 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(ind);
+      html+='<a href="'+mapsUrl+'" target="_blank" style="display:flex;align-items:center;gap:8px;padding:11px 16px;border-top:0.5px solid rgba(255,255,255,0.05);text-decoration:none">';
+      html+='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>';
+      html+='<span style="font-size:12px;color:var(--cyan);letter-spacing:0.02em">'+ind+'</span>';
+      html+='<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" style="flex-shrink:0;opacity:0.5;margin-left:auto"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>';
+      html+='</a>';
+    }
+    html+=`</div>`;
+  }
+
+  // Sezione prezzi F1/F2/F3 - layout verticale leggibile
+  if(f1||f2||f3||punFormula){
+    html+='<div class="section"><div class="section-title">Prezzi per fascia</div>';
+    // Modalità standard: mostra componente PUN in cima
+    if(prezMode==='standard' && punFormula){
+      html+='<div class="pun-banner">';
+      html+='<span class="pun-tag">PUN VARIABILE</span>';
+      html+='<span class="pun-formula">'+punFormula+'</span>';
+      html+='</div>';
+    }
+    html+='<div style="padding:4px 0">';
+    if(f1){
+      var f1label = (prezMode==='chiara' && !f2 && !f3) ? 'PG' : 'F1';
+      html+='<div class="prezzo-row">';
+      html+='<div class="fascia-badge fb-f1">'+f1label+'</div>';
+      html+='<div class="prezzo-text">'+f1+'</div>';
+      html+='</div>';
+    }
+    if(f2){
+      html+='<div class="prezzo-row">';
+      html+='<div class="fascia-badge fb-f2">F2</div>';
+      html+='<div class="prezzo-text">'+f2+'</div>';
+      html+='</div>';
+    }
+    if(f3){
+      html+='<div class="prezzo-row">';
+      html+='<div class="fascia-badge fb-f3">F3</div>';
+      html+='<div class="prezzo-text">'+f3+'</div>';
+      html+='</div>';
+    }
+    html+='</div>';
+    if(pf||pp){
+      html+='<div class="kv-grid" style="border-top:0.5px solid rgba(255,255,255,0.05)">';
+      if(pp) html+='<div class="kv"><div class="kv-label">Componente PUN</div><div class="kv-val price">'+pp+'</div></div>';
+      if(pf) html+='<div class="kv"><div class="kv-label">Quota fissa</div><div class="kv-val price">'+pf+'</div></div>';
+      html+='</div>';
+    }
+    html+='</div>';
+  } else if(pf||pp){
+    html+='<div class="section"><div class="section-title">Prezzi energia</div><div class="kv-grid">';
+    if(pp) html+='<div class="kv"><div class="kv-label">Componente PUN</div><div class="kv-val price">'+pp+'</div></div>';
+    if(pf) html+='<div class="kv"><div class="kv-label">Quota fissa</div><div class="kv-val price">'+pf+'</div></div>';
+    html+='</div></div>';
+  }
+
+  // Sezione consumi F1/F2/F3 con profilo
+  var cf1=fmtKwh(gCF1(row)), cf2=fmtKwh(gCF2(row)), cf3=fmtKwh(gCF3(row));
+  var ctot=fmtKwh(gCo(row));
+  // Se non c'è totale dal campo dedicato, somma F1+F2+F3
+  if(!ctot && cf1!==null && cf2!==null && cf3!==null) ctot=cf1+cf2+cf3;
+  if(cf1!==null || cf2!==null || cf3!==null || ctot!==null){
+    var tot = ctot || (cf1||0)+(cf2||0)+(cf3||0);
+    html+='<div class="section"><div class="section-title">Consumi annui (kWh)</div>';
+    // Barre proporzionali
+    html+='<div style="padding:12px 16px">';
+    var fasceC=[['F1',cf1,'var(--cyan)','fb-f1','bar-f1'],['F2',cf2,'var(--green)','fb-f2','bar-f2'],['F3',cf3,'var(--orange)','fb-f3','bar-f3']];
+    fasceC.forEach(function(fc){
+      var label=fc[0], val=fc[1], col=fc[2], fbClass=fc[3], barClass=fc[4];
+      var pct = (tot>0 && val!==null) ? Math.round(val/tot*1000)/10 : 0;
+      var vStr = val!==null ? val.toLocaleString('it') : '—';
+      html+='<div class="consumo-row">';
+      html+='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+      html+='<div style="display:flex;align-items:center;gap:8px">';
+      html+='<div class="fascia-badge '+fbClass+'">'+label+'</div>';
+      html+='<span style="font-size:16px;font-weight:700;color:'+col+'">'+vStr+'</span>';
+      html+='<span style="font-size:12px;color:var(--text2);font-weight:400">kWh</span>';
+      html+='</div>';
+      html+='<span style="font-size:14px;font-weight:700;color:'+col+'">'+pct+'%</span>';
+      html+='</div>';
+      html+='<div class="bar-track"><div class="bar-fill '+barClass+'" style="width:'+pct+'%"></div></div>';
+      html+='</div>';
+    });
+    // Totale e media mensile
+    var mensile = tot>0 ? Math.round(tot/12) : null;
+    html+='<div class="consumo-totals">';
+    html+='<div class="consumo-total-item"><div class="ct-label">Totale annuo</div><div class="ct-val">'+tot.toLocaleString('it')+' kWh</div></div>';
+    if(mensile){
+      html+='<div class="consumo-total-item"><div class="ct-label">Media mensile</div><div class="ct-val">'+mensile.toLocaleString('it')+' kWh</div></div>';
+    }
+    html+='</div>';
+    html+='</div>';
+  }
+
+  // Altri dati
+  if(extra.length){
+    html+=`<div class="section"><div class="section-title">Altri dati</div><div class="raw-list">
+      ${extra.filter(([k])=>!k.includes('mesi')&&!k.includes('mensili')).map(([k,v])=>`
+        <div class="raw-row">
+          <span class="raw-key">${k.replace(/_/g,' ')}</span>
+          <span class="raw-val">${v}</span>
+        </div>`).join('')}
+    </div></div>`;
+  }
+
+  // Share bar
+  html += '<div class="share-bar">';
+  html += '<button class="share-btn" onclick="shareWhatsApp('+idx+')">';
+  html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="var(--green)"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M11.996 1.004C5.919 1.004 1 5.923 1 12c0 1.943.497 3.77 1.37 5.362L1 23l5.773-1.352A10.943 10.943 0 0 0 11.996 23C18.073 23 23 18.077 23 12S18.073 1.004 11.996 1.004z"/></svg>';
+  html += 'WhatsApp</button>';
+  html += '<button class="share-btn" onclick="shareEmail('+idx+')">';
+  html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>';
+  html += 'Email</button>';
+  html += '</div>';
+
+  document.getElementById('podContent').innerHTML=html;
+
+  // Aggiungi note box dopo il rendering
+  var podEl = document.getElementById('podContent');
+  var noteDiv = document.createElement('div');
+  noteDiv.innerHTML = renderNoteBox(pod);
+  podEl.appendChild(noteDiv.firstChild);
+
+  var bottomPad = document.createElement('div');
+  bottomPad.className = 'bottom-pad';
+  podEl.appendChild(bottomPad);
+
+  switchScreen('screenPod');
+  window.scrollTo(0,0);
+}
+
+function switchScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goBack(){
+  navHistory.pop();
+  const prev=navHistory[navHistory.length-1];
+  if(prev==='analisti'){
+    document.getElementById('topTitle').textContent='S.E.E. Portfolio';
+    document.getElementById('topSub').textContent=allData.length.toLocaleString('it')+' record';
+    document.getElementById('btnBack').classList.remove('visible');
+    var logo=document.getElementById('topLogo'); if(logo) logo.style.display='';
+    switchScreen('screenAnalisti');
+  } else if(prev==='clienti'){
+    document.getElementById('topTitle').textContent=currentAnalista;
+    document.getElementById('topSub').textContent=clientiAnalista.length+' client'+(clientiAnalista.length===1?'e':'i');
+    switchScreen('screenClienti');
+  }
+  window.scrollTo(0,0);
+}
+
+// ═══════════════════════════════════════════
+// TAB: ANALISTI / RICERCA GLOBALE
+// ═══════════════════════════════════════════
+var currentTab = 'analisti';
+
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('tabAnalisti').classList.toggle('active', tab === 'analisti');
+  document.getElementById('tabGlobale').classList.toggle('active', tab === 'globale');
+  var inp = document.getElementById('searchAnalista');
+  inp.value = '';
+  inp.placeholder = tab === 'analisti' ? 'Cerca analista...' : 'Cerca cliente, POD, fornitore...';
+  if (tab === 'analisti') {
+    renderAnalisti();
+  } else {
+    document.getElementById('listAnalisti').innerHTML = '<div class="state-msg">Inizia a digitare per cercare in tutti i clienti</div>';
+  }
+}
+
+function onSearchAnalisti(val) {
+  if (currentTab === 'analisti') {
+    filterAnalisti(val);
+  } else {
+    searchGlobal(val);
+  }
+}
+
+function searchGlobal(q) {
+  if (!q || q.length < 2) {
+    document.getElementById('listAnalisti').innerHTML = '<div class="state-msg">Inizia a digitare per cercare in tutti i clienti</div>';
+    return;
+  }
+  var fl = q.toLowerCase();
+  var rows = allData.filter(function(r) {
+    return (gRS(r)+' '+gP(r)+' '+gFU(r)+' '+gFN(r)+' '+gInd(r)).toLowerCase().indexOf(fl) !== -1;
+  });
+  if (!rows.length) {
+    document.getElementById('listAnalisti').innerHTML = '<div class="state-msg">Nessun risultato per "'+q+'"</div>';
+    return;
+  }
+  var container = document.createElement('div');
+  container.className = 'list';
+  rows.forEach(function(row) {
+    var rs = gRS(row)||'(senza ragione sociale)';
+    var pod = gP(row)||'—';
+    var analista = gA(row)||'';
+    var tens = gT(row);
+    var fu = gFU(row), fn = gFN(row);
+    var isMT = tens.toUpperCase().indexOf('MT') !== -1 || tens.toUpperCase().indexOf('MEDIA') !== -1;
+    var isGas = tens.toUpperCase().indexOf('GAS') !== -1 || pod.indexOf('PDR') === 0;
+    var bc = isMT ? 'badge-mt' : isGas ? 'badge-gas' : 'badge-bt';
+    var bl = tens || (isGas ? 'Gas' : 'BT');
+    var allDataIdx = allData.indexOf(row);
+    var card = document.createElement('div');
+    card.className = 'cliente-card';
+    card.onclick = (function(i){ return function(){ openPod(i); }; })(allDataIdx);
+    var html = '<div class="cliente-header">';
+    html += '<div style="flex:1;min-width:0"><div class="cliente-rs">'+rs+'</div>';
+    html += '<div class="cliente-pod">'+pod+'</div></div>';
+    html += '<span class="badge '+bc+'">'+bl+'</span></div>';
+    html += '<div class="cliente-meta"><div class="meta-item">Analista: <span class="meta-val">'+analista+'</span></div>';
+    if(fn) html += '<div class="meta-item">Fornitore: <span class="meta-val">'+fn+'</span></div>';
+    html += '</div>';
+    card.innerHTML = html;
+    container.appendChild(card);
+  });
+  var el = document.getElementById('listAnalisti');
+  el.innerHTML = '<div style="padding:8px 14px 0;font-size:12px;color:var(--text2)">'+rows.length+' risultati</div>';
+  el.appendChild(container);
+}
+
+// ═══════════════════════════════════════════
+// FILTRI E ORDINAMENTO CLIENTI
+// ═══════════════════════════════════════════
+function popolaFiltroFornitore() {
+  var sel = document.getElementById('filtroFornitore');
+  if (!sel) return;
+  var fornitori = [...new Set(clientiAnalista.map(function(r){ return gFN(r)||gFU(r); }).filter(Boolean))].sort();
+  sel.innerHTML = '<option value="">Tutti i fornitori</option>';
+  fornitori.forEach(function(f) {
+    var opt = document.createElement('option');
+    opt.value = f; opt.textContent = f;
+    sel.appendChild(opt);
+  });
+}
+
+// ═══════════════════════════════════════════
+// SCHERMATA RIASSUNTIVA ANALISTA
+// ═══════════════════════════════════════════
+function renderKpiAnalista(nome) {
+  var rows = clientiAnalista;
+  var totPod = rows.length;
+  var totMT = rows.filter(function(r){ return gT(r).toUpperCase().indexOf('MT') !== -1; }).length;
+  var totBT = totPod - totMT;
+  var totConsumo = rows.reduce(function(acc, r) {
+    var v = parseFloat(String(gCo(r)).replace(/[^\d.]/g,''));
+    return acc + (isNaN(v) ? 0 : v);
+  }, 0);
+  var fornitori = [...new Set(rows.map(function(r){ return gFN(r)||gFU(r); }).filter(Boolean))];
+
+  var html = '<div class="kpi-grid">';
+  html += '<div class="kpi-card"><div class="kpi-label">POD totali</div><div class="kpi-val">'+totPod+'</div></div>';
+  html += '<div class="kpi-card"><div class="kpi-label">Consumo portafoglio</div><div class="kpi-val" style="font-size:15px">'+Math.round(totConsumo/1000).toLocaleString('it')+' MWh</div></div>';
+  html += '<div class="kpi-card"><div class="kpi-label">Tensione</div><div class="kpi-val" style="font-size:15px">'+totMT+' MT</div><div class="kpi-sub">'+totBT+' BT</div></div>';
+  html += '<div class="kpi-card"><div class="kpi-label">Fornitori</div><div class="kpi-val">'+fornitori.length+'</div><div class="kpi-sub" style="font-size:10px;line-height:1.4">'+fornitori.slice(0,3).join(', ')+(fornitori.length>3?'...':'')+'</div></div>';
+  html += '</div>';
+  return html;
+}
+
+// ═══════════════════════════════════════════
+// NOTE POD (localStorage)
+// ═══════════════════════════════════════════
+function getNoteKey(pod) { return 'note_pod_' + pod; }
+
+function loadNota(pod) {
+  try { return localStorage.getItem(getNoteKey(pod)) || ''; } catch(e) { return ''; }
+}
+
+function salvaNota() {
+  var pod = _currentNotePod;
+  var ta = document.getElementById('notaTextarea');
+  if (!ta || !pod) return;
+  try {
+    localStorage.setItem(getNoteKey(pod), ta.value);
+    var btn = document.getElementById('notaSaveBtn');
+    if (btn) { btn.textContent = '✓ Salvato'; setTimeout(function(){ btn.textContent = 'Salva nota'; }, 1500); }
+  } catch(e) { alert('Impossibile salvare: cache del browser non disponibile.'); }
+}
+
+var _currentNotePod = '';
+
+function renderNoteBox(pod) {
+  _currentNotePod = pod;
+  var nota = loadNota(pod);
+  return '<div class="note-box">'
+    + '<div class="note-label">Note</div>'
+    + '<textarea class="note-textarea" id="notaTextarea" placeholder="Aggiungi una nota su questo POD...">'+(nota||'')+'</textarea>'
+    + '<div style="display:flex;justify-content:space-between;align-items:center">'
+    + '<button class="note-save-btn" id="notaSaveBtn" onclick="salvaNota()">Salva nota</button>'
+    + '<span class="note-warning">&#x26A0; Le note sono salvate solo su questo dispositivo</span>'
+    + '</div></div>';
+}
+
+// ═══════════════════════════════════════════
+// CONDIVISIONE SCHEDA POD
+// ═══════════════════════════════════════════
+function condividiTesto(row) {
+  var rs = gRS(row)||''; var pod = gP(row)||'';
+  var tens = gT(row); var fu = gFU(row); var fn = gFN(row);
+  var ind = gInd(row); var consumo = gCo(row); var potenza = gPo(row);
+  var prez = normalizePrezzi(row);
+  var testo = '*'+rs+'*\n';
+  testo += 'POD: '+pod+'\n';
+  if(tens) testo += 'Tensione: '+tens+'\n';
+  if(potenza) testo += 'Potenza: '+potenza+' kW\n';
+  if(consumo) testo += 'Consumo annuo: '+consumo+' kWh\n';
+  if(fu) testo += 'Fornitore attuale: '+fu+'\n';
+  if(fn && fn!==fu) testo += 'Fornitore nuovo: '+fn+'\n';
+  if(prez.punFormula) testo += 'PUN: '+prez.punFormula+'\n';
+  if(prez.f1) testo += 'F1: '+prez.f1+'\n';
+  if(prez.f2) testo += 'F2: '+prez.f2+'\n';
+  if(prez.f3) testo += 'F3: '+prez.f3+'\n';
+  if(ind) testo += ind+'\n';
+  var nota = loadNota(pod);
+  if(nota) testo += '\nNote: '+nota;
+  testo += '\n\n_S.E.E. Portfolio_';
+  return testo;
+}
+
+function shareWhatsApp(idx) {
+  var row = allData[idx]; if(!row) return;
+  var testo = condividiTesto(row);
+  window.open('https://wa.me/?text=' + encodeURIComponent(testo), '_blank');
+}
+
+function shareEmail(idx) {
+  var row = allData[idx]; if(!row) return;
+  var rs = gRS(row)||'POD';
+  var testo = condividiTesto(row).replace(/\*/g,'').replace(/_/g,'');
+  window.open('mailto:?subject=Scheda%20'+encodeURIComponent(rs)+'&body='+encodeURIComponent(testo), '_blank');
+}
+
+// Click analisti gestito via closure onclick in renderAnalisti()
+// Click clienti gestito via closure onclick in renderClienti()
+
+loadData();
+</script>
+</body>
+</html>
