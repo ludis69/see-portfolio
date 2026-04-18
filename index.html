@@ -358,6 +358,66 @@ body {
 .kpi-val { font-size: 20px; font-weight: 700; color: var(--cyan); }
 .kpi-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
 
+/* GRUPPO */
+.gruppo-search-card {
+  background: var(--card); border: 0.5px solid var(--card-border);
+  border-radius: 12px; padding: 11px 14px; cursor: pointer;
+  transition: background 0.1s;
+}
+.gruppo-search-card:active { background: var(--bg3); }
+.gruppo-search-name { font-size: 13px; font-weight: 600; color: var(--text); }
+.gruppo-search-sub { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.gruppo-add-btn {
+  width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
+  border: none; cursor: pointer; font-size: 18px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.gruppo-add-btn.add { background: var(--green-dim); color: var(--green); }
+.gruppo-add-btn.remove { background: rgba(255,69,58,0.15); color: var(--danger); }
+
+.pod-chip {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--bg3); border: 0.5px solid var(--card-border);
+  border-radius: 20px; padding: 4px 10px; font-size: 11px; color: var(--text2);
+}
+.pod-chip-remove {
+  color: var(--danger); cursor: pointer; font-size: 14px; line-height: 1;
+  background: none; border: none; padding: 0;
+}
+
+.profilo-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+.profilo-table th {
+  padding: 8px 12px; text-align: right; font-weight: 700; font-size: 10px;
+  color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em;
+  border-bottom: 0.5px solid rgba(255,255,255,0.08);
+}
+.profilo-table th:first-child { text-align: left; }
+.profilo-table td {
+  padding: 9px 12px; text-align: right;
+  border-bottom: 0.5px solid rgba(255,255,255,0.04);
+  color: var(--text); font-size: 12px;
+}
+.profilo-table td:first-child { text-align: left; color: var(--text2); font-size: 11px; }
+.profilo-table tr:last-child td { border-bottom: none; }
+.profilo-table tr.totale-row td {
+  font-weight: 700; color: var(--cyan);
+  border-top: 0.5px solid rgba(0,200,255,0.2);
+  font-size: 13px;
+}
+.profilo-table tr.escluso td { opacity: 0.35; }
+
+.riepilogo-fascia {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 8px;
+  padding: 12px 14px;
+}
+.rf-card {
+  background: var(--bg3); border-radius: 10px; padding: 10px;
+  text-align: center; border: 0.5px solid var(--card-border);
+}
+.rf-label { font-size: 11px; color: var(--text2); margin-bottom: 4px; }
+.rf-kwh { font-size: 14px; font-weight: 700; }
+.rf-pct { font-size: 12px; font-weight: 600; margin-top: 2px; }
+
 /* Header decorativo */
 .app-header {
   padding: 16px 16px 8px;
@@ -389,13 +449,45 @@ body {
   <div class="search-wrap">
     <div style="display:flex;gap:8px;margin-bottom:8px">
       <button class="tab-btn active" id="tabAnalisti" onclick="switchTab('analisti')">Analisti</button>
-      <button class="tab-btn" id="tabGlobale" onclick="switchTab('globale')">Ricerca globale</button>
+      <button class="tab-btn" id="tabGlobale" onclick="switchTab('globale')">Ricerca</button>
+      <button class="tab-btn" id="tabGruppo" onclick="switchTab('gruppo')">Gruppo</button>
     </div>
     <input class="search-input" type="search" placeholder="Cerca analista..."
       oninput="onSearchAnalisti(this.value)" id="searchAnalista" autocomplete="off"/>
   </div>
   <div id="listAnalisti">
     <div class="state-msg"><div class="spinner"></div>Connessione a Google Sheets...</div>
+  </div>
+</div>
+
+<!-- SCREEN: GRUPPO PROFILO -->
+<div class="screen" id="screenGruppo">
+  <div class="search-wrap">
+    <input class="search-input" type="search" placeholder="Cerca cliente da aggiungere al gruppo..."
+      oninput="searchGruppo(this.value)" id="searchGruppoInput" autocomplete="off"/>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <select class="filter-select" id="filtroGruppoTensione" onchange="searchGruppo(document.getElementById('searchGruppoInput').value)">
+        <option value="">MT + BT</option>
+        <option value="MT">Solo MT</option>
+        <option value="BT">Solo BT</option>
+        <option value="Gas">Solo Gas</option>
+      </select>
+      <select class="filter-select" id="filtroGruppoFornitore" onchange="searchGruppo(document.getElementById('searchGruppoInput').value)">
+        <option value="">Tutti i fornitori</option>
+      </select>
+    </div>
+  </div>
+  <div id="gruppoContent">
+    <div id="gruppoPodSelezionati" style="display:none">
+      <div style="padding:10px 14px 0;display:flex;justify-content:space-between;align-items:center">
+        <span style="font-size:12px;font-weight:700;color:var(--cyan);text-transform:uppercase;letter-spacing:0.06em" id="gruppoPodCount">0 POD selezionati</span>
+        <button onclick="svuotaGruppo()" style="font-size:11px;color:var(--danger);background:none;border:none;cursor:pointer">Svuota tutto</button>
+      </div>
+      <div id="gruppoPodList" style="padding:8px 14px;display:flex;flex-wrap:wrap;gap:6px"></div>
+      <button onclick="calcolaGruppo()" style="margin:0 14px 10px;width:calc(100% - 28px);padding:12px;background:var(--cyan);color:#000;font-weight:700;font-size:14px;border:none;border-radius:10px;cursor:pointer">Calcola profilo gruppo</button>
+    </div>
+    <div id="gruppoRisultati" style="display:none"></div>
+    <div id="gruppoSearchResults"></div>
   </div>
 </div>
 
@@ -877,7 +969,7 @@ function goBack(){
     document.getElementById('topSub').textContent=allData.length.toLocaleString('it')+' record';
     document.getElementById('btnBack').classList.remove('visible');
     var logo=document.getElementById('topLogo'); if(logo) logo.style.display='';
-    switchScreen('screenAnalisti');
+    if(currentTab === 'gruppo') { switchScreen('screenGruppo'); } else { switchScreen('screenAnalisti'); }
   } else if(prev==='clienti'){
     document.getElementById('topTitle').textContent=currentAnalista;
     document.getElementById('topSub').textContent=clientiAnalista.length+' client'+(clientiAnalista.length===1?'e':'i');
@@ -895,6 +987,15 @@ function switchTab(tab) {
   currentTab = tab;
   document.getElementById('tabAnalisti').classList.toggle('active', tab === 'analisti');
   document.getElementById('tabGlobale').classList.toggle('active', tab === 'globale');
+  document.getElementById('tabGruppo').classList.toggle('active', tab === 'gruppo');
+
+  if (tab === 'gruppo') {
+    switchScreen('screenGruppo');
+    switchTabGruppo();
+    return;
+  }
+
+  switchScreen('screenAnalisti');
   var inp = document.getElementById('searchAnalista');
   inp.value = '';
   inp.placeholder = tab === 'analisti' ? 'Cerca analista...' : 'Cerca cliente, POD, fornitore...';
@@ -1066,6 +1167,344 @@ function shareEmail(idx) {
   var rs = gRS(row)||'POD';
   var testo = condividiTesto(row).replace(/\*/g,'').replace(/_/g,'');
   window.open('mailto:?subject=Scheda%20'+encodeURIComponent(rs)+'&body='+encodeURIComponent(testo), '_blank');
+}
+
+// ═══════════════════════════════════════════
+// PROFILO GRUPPO
+// ═══════════════════════════════════════════
+var gruppoPodSet = {}; // { podCode: rowIndex }
+
+function switchTabGruppo() {
+  // Popola filtro fornitori gruppo
+  var sel = document.getElementById('filtroGruppoFornitore');
+  if (sel && sel.options.length === 1) {
+    var fornitori = [...new Set(allData.map(function(r){ return gFN(r)||gFU(r); }).filter(Boolean))].sort();
+    fornitori.forEach(function(f){
+      var o = document.createElement('option'); o.value=f; o.textContent=f; sel.appendChild(o);
+    });
+  }
+  document.getElementById('searchGruppoInput').value = '';
+  document.getElementById('gruppoSearchResults').innerHTML = '<div class="state-msg" style="padding:30px 20px">Cerca un cliente per aggiungerlo al gruppo</div>';
+  aggiornaChips();
+}
+
+function searchGruppo(q) {
+  var filtroT = document.getElementById('filtroGruppoTensione').value;
+  var filtroF = document.getElementById('filtroGruppoFornitore').value;
+  var el = document.getElementById('gruppoSearchResults');
+
+  if (!q && !filtroT && !filtroF) {
+    el.innerHTML = '<div class="state-msg" style="padding:30px 20px">Cerca un cliente per aggiungerlo al gruppo</div>';
+    return;
+  }
+
+  var fl = q.toLowerCase();
+
+  // Raggruppa per ragione sociale
+  var clientiMap = {};
+  allData.forEach(function(row, idx) {
+    var rs = gRS(row); if (!rs) return;
+    var tens = gT(row).toUpperCase();
+    var pod = gP(row).toUpperCase();
+    var fn = gFN(row)||gFU(row);
+    var isMT = tens.indexOf('MT') !== -1 || tens.indexOf('MEDIA') !== -1;
+    var isGas = tens.indexOf('GAS') !== -1 || pod.indexOf('PDR') === 0;
+    var isBT = !isMT && !isGas;
+
+    if (fl && (rs+' '+gP(row)+' '+fn).toLowerCase().indexOf(fl) === -1) return;
+    if (filtroT === 'MT' && !isMT) return;
+    if (filtroT === 'BT' && !isBT) return;
+    if (filtroT === 'Gas' && !isGas) return;
+    if (filtroF && fn !== filtroF) return;
+
+    if (!clientiMap[rs]) clientiMap[rs] = [];
+    clientiMap[rs].push(idx);
+  });
+
+  var clienti = Object.keys(clientiMap).sort();
+  if (!clienti.length) {
+    el.innerHTML = '<div class="state-msg" style="padding:20px">Nessun cliente trovato</div>';
+    return;
+  }
+
+  var container = document.createElement('div');
+  container.className = 'list';
+
+  clienti.slice(0, 30).forEach(function(rs) {
+    var idxList = clientiMap[rs];
+    var nPod = idxList.length;
+    var tuttiPresenti = idxList.every(function(i){ return gruppoPodSet[gP(allData[i])] !== undefined; });
+
+    var card = document.createElement('div');
+    card.className = 'gruppo-search-card';
+    card.style.display = 'flex';
+    card.style.alignItems = 'center';
+    card.style.gap = '10px';
+
+    var info = document.createElement('div');
+    info.style.flex = '1';
+    info.innerHTML = '<div class="gruppo-search-name">'+rs+'</div>'
+      + '<div class="gruppo-search-sub">'+nPod+' POD &nbsp;·&nbsp; '+(allData[idxList[0]] ? (gFN(allData[idxList[0]])||gFU(allData[idxList[0]])||'') : '')+'</div>';
+
+    var btn = document.createElement('button');
+    btn.className = 'gruppo-add-btn ' + (tuttiPresenti ? 'remove' : 'add');
+    btn.textContent = tuttiPresenti ? '−' : '+';
+    btn.onclick = (function(r, iList, b) {
+      return function(e) {
+        e.stopPropagation();
+        var allIn = iList.every(function(i){ return gruppoPodSet[gP(allData[i])] !== undefined; });
+        if (allIn) {
+          iList.forEach(function(i){ delete gruppoPodSet[gP(allData[i])]; });
+          b.textContent = '+'; b.className = 'gruppo-add-btn add';
+        } else {
+          iList.forEach(function(i){ var p=gP(allData[i]); if(p) gruppoPodSet[p]=i; });
+          b.textContent = '−'; b.className = 'gruppo-add-btn remove';
+        }
+        aggiornaChips();
+      };
+    })(rs, idxList, btn);
+
+    // Click su card espande i POD singoli
+    card.onclick = (function(r, iList) {
+      return function() { espandiPodCliente(r, iList, container); };
+    })(rs, idxList);
+
+    card.appendChild(info);
+    card.appendChild(btn);
+    container.appendChild(card);
+  });
+
+  el.innerHTML = '';
+  el.appendChild(container);
+}
+
+function espandiPodCliente(rs, idxList, container) {
+  // Mostra/nasconde i POD singoli sotto la card del cliente
+  var existingExpanded = document.getElementById('expanded_'+rs.replace(/\s/g,'_'));
+  if (existingExpanded) { existingExpanded.remove(); return; }
+
+  var expanded = document.createElement('div');
+  expanded.id = 'expanded_'+rs.replace(/\s/g,'_');
+  expanded.style.cssText = 'background:var(--bg3);border-radius:10px;margin:0 0 4px;padding:6px 10px;display:flex;flex-direction:column;gap:4px';
+
+  idxList.forEach(function(i) {
+    var row = allData[i];
+    var pod = gP(row);
+    var tens = gT(row);
+    var fn = gFN(row)||gFU(row);
+    var presente = gruppoPodSet[pod] !== undefined;
+
+    var podRow = document.createElement('div');
+    podRow.style.cssText = 'display:flex;align-items:center;justify-content:space-between;gap:8px;padding:5px 0;border-bottom:0.5px solid rgba(255,255,255,0.05)';
+    podRow.innerHTML = '<div>'
+      + '<div style="font-size:11px;font-family:monospace;color:var(--cyan)">'+pod+'</div>'
+      + '<div style="font-size:10px;color:var(--text2)">'+tens+(fn?' · '+fn:'')+'</div>'
+      + '</div>';
+
+    var btnPod = document.createElement('button');
+    btnPod.className = 'gruppo-add-btn ' + (presente ? 'remove' : 'add');
+    btnPod.textContent = presente ? '−' : '+';
+    btnPod.style.width = '24px'; btnPod.style.height = '24px'; btnPod.style.fontSize = '14px';
+    btnPod.onclick = (function(p, idx, b) {
+      return function(e) {
+        e.stopPropagation();
+        if (gruppoPodSet[p] !== undefined) {
+          delete gruppoPodSet[p];
+          b.textContent = '+'; b.className = 'gruppo-add-btn add';
+        } else {
+          gruppoPodSet[p] = idx;
+          b.textContent = '−'; b.className = 'gruppo-add-btn remove';
+        }
+        aggiornaChips();
+      };
+    })(pod, i, btnPod);
+
+    podRow.appendChild(btnPod);
+    expanded.appendChild(podRow);
+  });
+
+  // Inserisci dopo la card del cliente
+  var cards = container.querySelectorAll('.gruppo-search-card');
+  var targetCard = null;
+  cards.forEach(function(c) {
+    if (c.querySelector('.gruppo-search-name') && c.querySelector('.gruppo-search-name').textContent === rs) {
+      targetCard = c;
+    }
+  });
+  if (targetCard && targetCard.nextSibling) {
+    container.insertBefore(expanded, targetCard.nextSibling);
+  } else if (targetCard) {
+    container.appendChild(expanded);
+  }
+}
+
+function aggiornaChips() {
+  var pods = Object.keys(gruppoPodSet);
+  var countEl = document.getElementById('gruppoPodCount');
+  var listEl = document.getElementById('gruppoPodList');
+  var selEl = document.getElementById('gruppoPodSelezionati');
+  var risEl = document.getElementById('gruppoRisultati');
+
+  if (!countEl) return;
+
+  if (pods.length === 0) {
+    selEl.style.display = 'none';
+    risEl.style.display = 'none';
+    return;
+  }
+
+  selEl.style.display = 'block';
+  countEl.textContent = pods.length + ' POD selezionat' + (pods.length === 1 ? 'o' : 'i');
+
+  listEl.innerHTML = '';
+  pods.forEach(function(pod) {
+    var chip = document.createElement('span');
+    chip.className = 'pod-chip';
+    chip.innerHTML = pod + ' <button class="pod-chip-remove" title="Rimuovi">&#x00D7;</button>';
+    chip.querySelector('button').onclick = (function(p) {
+      return function() { delete gruppoPodSet[p]; aggiornaChips(); };
+    })(pod);
+    listEl.appendChild(chip);
+  });
+}
+
+function svuotaGruppo() {
+  gruppoPodSet = {};
+  aggiornaChips();
+  document.getElementById('gruppoRisultati').style.display = 'none';
+}
+
+function calcolaGruppo() {
+  var pods = Object.keys(gruppoPodSet);
+  if (!pods.length) return;
+
+  var rows = pods.map(function(p) { return allData[gruppoPodSet[p]]; }).filter(Boolean);
+
+  // Totali
+  var totF1 = 0, totF2 = 0, totF3 = 0, totTot = 0;
+  rows.forEach(function(r) {
+    var f1 = Math.round(parseFloat(String(r['f1_12_mesi']||'0').replace(',','.'))||0);
+    var f2 = Math.round(parseFloat(String(r['f2_12_mesi']||'0').replace(',','.'))||0);
+    var f3 = Math.round(parseFloat(String(r['f3_12_mesi']||'0').replace(',','.'))||0);
+    var tot = Math.round(parseFloat(String(gCo(r)||'0').replace(/[^\d.]/g,''))||0);
+    if (!tot && (f1||f2||f3)) tot = f1+f2+f3;
+    r._f1=f1; r._f2=f2; r._f3=f3; r._tot=tot;
+    totF1+=f1; totF2+=f2; totF3+=f3; totTot+=tot;
+  });
+  if (!totTot && (totF1||totF2||totF3)) totTot=totF1+totF2+totF3;
+
+  var pct = function(v,t){ return t>0 ? (v/t*100).toFixed(1)+'%' : '—'; };
+  var fmt = function(v){ return v>0 ? Math.round(v).toLocaleString('it') : '—'; };
+
+  // Tabella dettaglio POD
+  var html = '<div class="section" style="margin:12px 14px">';
+  html += '<div class="section-title">Dettaglio POD</div>';
+  html += '<div style="overflow-x:auto"><table class="profilo-table">';
+  html += '<thead><tr>';
+  html += '<th>Ragione Sociale / POD</th>';
+  html += '<th style="color:var(--cyan)">F1 kWh</th>';
+  html += '<th style="color:var(--green)">F2 kWh</th>';
+  html += '<th style="color:var(--orange)">F3 kWh</th>';
+  html += '<th>Totale</th>';
+  html += '</tr></thead><tbody>';
+
+  rows.forEach(function(r) {
+    var rs = gRS(r)||'—'; var pod = gP(r)||'—';
+    var tens = gT(r); var fn = gFN(r)||gFU(r);
+    var isMT = tens.toUpperCase().indexOf('MT')!==-1 || tens.toUpperCase().indexOf('MEDIA')!==-1;
+    var badgeCol = isMT ? 'var(--cyan)' : 'var(--green)';
+    html += '<tr>';
+    html += '<td><div style="font-weight:600;color:var(--text);font-size:12px">'+rs+'</div>'
+      + '<div style="font-family:monospace;font-size:10px;color:'+badgeCol+'">'+pod+'</div>'
+      + (fn?'<div style="font-size:10px;color:var(--text2)">'+fn+'</div>':'')
+      + '</td>';
+    html += '<td style="color:var(--cyan)">'+fmt(r._f1)+'</td>';
+    html += '<td style="color:var(--green)">'+fmt(r._f2)+'</td>';
+    html += '<td style="color:var(--orange)">'+fmt(r._f3)+'</td>';
+    html += '<td>'+fmt(r._tot)+'</td>';
+    html += '</tr>';
+  });
+
+  html += '</tbody></table></div></div>';
+
+  // Riepilogo aggregato
+  html += '<div class="section" style="margin:0 14px 12px">';
+  html += '<div class="section-title">Profilo gruppo — '+rows.length+' POD</div>';
+  html += '<div class="riepilogo-fascia">';
+
+  var fasceR = [
+    {label:'F1', val:totF1, col:'var(--cyan)'},
+    {label:'F2', val:totF2, col:'var(--green)'},
+    {label:'F3', val:totF3, col:'var(--orange)'}
+  ];
+  fasceR.forEach(function(f) {
+    html += '<div class="rf-card">';
+    html += '<div class="rf-label">'+f.label+'</div>';
+    html += '<div class="rf-kwh" style="color:'+f.col+'">'+fmt(f.val)+'</div>';
+    html += '<div class="rf-pct" style="color:'+f.col+'">'+pct(f.val,totTot)+'</div>';
+    html += '</div>';
+  });
+  html += '</div>';
+
+  // Barre profilo
+  html += '<div style="padding:0 14px 14px">';
+  fasceR.forEach(function(f) {
+    var p = totTot > 0 ? Math.round(f.val/totTot*1000)/10 : 0;
+    html += '<div style="margin-bottom:10px">';
+    html += '<div style="display:flex;justify-content:space-between;margin-bottom:4px">';
+    html += '<span style="font-size:12px;color:var(--text2)">'+f.label+'</span>';
+    html += '<span style="font-size:12px;font-weight:700;color:'+f.col+'">'+p+'%</span>';
+    html += '</div>';
+    html += '<div style="height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden">';
+    html += '<div style="height:100%;width:'+p+'%;background:'+f.col+';border-radius:3px"></div>';
+    html += '</div></div>';
+  });
+
+  // Totale generale
+  html += '<div style="border-top:0.5px solid rgba(255,255,255,0.08);padding-top:12px;text-align:center">';
+  html += '<div style="font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:4px">Totale complessivo</div>';
+  html += '<div style="font-size:22px;font-weight:700;color:var(--cyan)">'+fmt(totTot)+' kWh</div>';
+  html += '<div style="font-size:12px;color:var(--text2);margin-top:2px">'+fmt(Math.round(totTot/12))+' kWh/mese (media)</div>';
+  html += '</div></div></div>';
+
+  // Pulsante condividi testo
+  html += '<div style="padding:0 14px 24px">';
+  html += '<button onclick="condividiGruppo()" style="width:100%;padding:11px;background:var(--bg3);border:0.5px solid var(--card-border);border-radius:10px;color:var(--text);font-size:13px;font-weight:600;cursor:pointer">Condividi riepilogo via WhatsApp</button>';
+  html += '</div>';
+
+  var risEl = document.getElementById('gruppoRisultati');
+  risEl.innerHTML = html;
+  risEl.style.display = 'block';
+  risEl.scrollIntoView({behavior:'smooth'});
+}
+
+function condividiGruppo() {
+  var pods = Object.keys(gruppoPodSet);
+  var rows = pods.map(function(p){ return allData[gruppoPodSet[p]]; }).filter(Boolean);
+  var totF1=0,totF2=0,totF3=0,totTot=0;
+  rows.forEach(function(r){
+    var f1=Math.round(parseFloat(String(r['f1_12_mesi']||'0').replace(',','.'))||0);
+    var f2=Math.round(parseFloat(String(r['f2_12_mesi']||'0').replace(',','.'))||0);
+    var f3=Math.round(parseFloat(String(r['f3_12_mesi']||'0').replace(',','.'))||0);
+    var tot=Math.round(parseFloat(String(gCo(r)||'0').replace(/[^\\d.]/g,''))||0);
+    if(!tot&&(f1||f2||f3)) tot=f1+f2+f3;
+    totF1+=f1;totF2+=f2;totF3+=f3;totTot+=tot;
+  });
+  if(!totTot&&(totF1||totF2||totF3)) totTot=totF1+totF2+totF3;
+  var pct=function(v,t){return t>0?(v/t*100).toFixed(1)+'%':'—';};
+  var fmt=function(v){return v>0?Math.round(v).toLocaleString('it'):'—';};
+
+  var testo = '*Profilo Gruppo S.E.E. — '+pods.length+' POD*\\n\\n';
+  rows.forEach(function(r){
+    testo += '• '+( gRS(r)||gP(r) )+'\\n';
+  });
+  testo += '\\n*Consumi annui:*\\n';
+  testo += 'F1: '+fmt(totF1)+' kWh ('+pct(totF1,totTot)+')\\n';
+  testo += 'F2: '+fmt(totF2)+' kWh ('+pct(totF2,totTot)+')\\n';
+  testo += 'F3: '+fmt(totF3)+' kWh ('+pct(totF3,totTot)+')\\n';
+  testo += 'Totale: '+fmt(totTot)+' kWh\\n';
+  testo += '_S.E.E. Portfolio_';
+  window.open('https://wa.me/?text='+encodeURIComponent(testo),'_blank');
 }
 
 // Click analisti gestito via closure onclick in renderAnalisti()
