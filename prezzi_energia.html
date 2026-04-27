@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEE — Dashboard Prezzi Energia 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+  /* ── Reset & base ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg:       #0f1117;
+    --surface:  #1a1d27;
+    --surface2: #222535;
+    --border:   rgba(255,255,255,0.08);
+    --text:     #e8eaf0;
+    --muted:    #8b90a0;
+    --accent:   #4f8ef7;
+    --green:    #4aaa6b;
+    --red:      #e05252;
+    --radius:   10px;
+    --radius-sm: 6px;
+    --font: 'Segoe UI', system-ui, sans-serif;
+  }
+  body { background: var(--bg); color: var(--text); font-family: var(--font);
+         font-size: 14px; line-height: 1.6; min-height: 100vh; }
+
+  /* ── Header ── */
+  header { background: var(--surface); border-bottom: 1px solid var(--border);
+           padding: 0 24px; display: flex; align-items: center;
+           justify-content: space-between; height: 56px; }
+  .logo { font-size: 16px; font-weight: 600; color: var(--text); letter-spacing: 0.5px; }
+  .logo span { color: var(--accent); }
+  #last-update { font-size: 12px; color: var(--muted); }
+
+  /* ── Layout ── */
+  .container { max-width: 1100px; margin: 0 auto; padding: 24px 20px; }
+
+  /* ── Tab bar ── */
+  .tab-bar { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 20px; }
+  .tab-btn { padding: 7px 16px; border-radius: var(--radius-sm); font-size: 13px;
+             cursor: pointer; border: 1px solid var(--border);
+             background: var(--surface); color: var(--muted);
+             transition: all .15s; white-space: nowrap; }
+  .tab-btn:hover { border-color: rgba(79,142,247,0.4); color: var(--text); }
+  .tab-btn.active { background: var(--accent); color: #fff; border-color: transparent;
+                    font-weight: 500; }
+
+  /* ── Metric cards ── */
+  .metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+             gap: 10px; margin-bottom: 20px; }
+  .metric { background: var(--surface); border: 1px solid var(--border);
+            border-radius: var(--radius); padding: 14px 16px; }
+  .metric .lbl { font-size: 11px; color: var(--muted); text-transform: uppercase;
+                 letter-spacing: .5px; margin-bottom: 6px; }
+  .metric .val { font-size: 22px; font-weight: 600; color: var(--text); }
+  .metric .unit { font-size: 11px; color: var(--muted); margin-top: 2px; }
+
+  /* ── Toolbar ── */
+  .toolbar { display: flex; align-items: center; justify-content: space-between;
+             flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+  .toolbar-left { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .toolbar-right { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+  select { background: var(--surface); color: var(--text); border: 1px solid var(--border);
+           border-radius: var(--radius-sm); padding: 6px 10px; font-size: 13px;
+           cursor: pointer; outline: none; }
+  select:focus { border-color: var(--accent); }
+
+  /* ── View toggle ── */
+  .view-toggle { display: flex; border: 1px solid var(--border); border-radius: var(--radius-sm);
+                 overflow: hidden; }
+  .vt-btn { padding: 6px 12px; font-size: 12px; cursor: pointer; border: none;
+            background: var(--surface); color: var(--muted);
+            display: flex; align-items: center; gap: 5px; transition: all .15s; }
+  .vt-btn:first-child { border-right: 1px solid var(--border); }
+  .vt-btn.active { background: var(--surface2); color: var(--text); font-weight: 500; }
+  .vt-btn svg { width: 13px; height: 13px; }
+
+  /* ── Export buttons ── */
+  .btn-exp { display: inline-flex; align-items: center; gap: 6px; padding: 6px 13px;
+             border-radius: var(--radius-sm); font-size: 12px; cursor: pointer;
+             border: 1px solid var(--border); background: var(--surface);
+             color: var(--muted); white-space: nowrap; transition: all .15s; }
+  .btn-exp:hover { background: var(--surface2); color: var(--text); }
+  .btn-exp svg { width: 14px; height: 14px; flex-shrink: 0; }
+  .btn-mail { border-color: rgba(79,142,247,.4); color: #4f8ef7; }
+  .btn-mail:hover { background: rgba(79,142,247,.1); }
+  .btn-wa   { border-color: rgba(37,211,102,.4); color: #25d366; }
+  .btn-wa:hover { background: rgba(37,211,102,.08); }
+
+  /* ── Legend ── */
+  .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 10px;
+            font-size: 12px; color: var(--muted); }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── Chart ── */
+  .chart-wrap { position: relative; width: 100%; height: 320px;
+                background: var(--surface); border: 1px solid var(--border);
+                border-radius: var(--radius); padding: 16px; }
+
+  /* ── Table ── */
+  .tbl-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius);
+              background: var(--surface); }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border);
+             color: var(--muted); font-weight: 500; white-space: nowrap;
+             background: var(--surface2); font-size: 12px; text-transform: uppercase;
+             letter-spacing: .4px; }
+  tbody td { padding: 8px 14px; border-bottom: 1px solid rgba(255,255,255,.04);
+             white-space: nowrap; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: var(--surface2); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; font-family: monospace; font-size: 13px; }
+  .up   { color: var(--green); }
+  .down { color: var(--red); }
+  .flat { color: var(--muted); }
+
+  /* ── Loading / error ── */
+  .status { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .status .icon { font-size: 36px; margin-bottom: 12px; }
+  .status p { font-size: 14px; }
+  .spinner { width: 32px; height: 32px; border: 3px solid var(--border);
+             border-top-color: var(--accent); border-radius: 50%;
+             animation: spin .8s linear infinite; margin: 0 auto 12px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Footer ── */
+  footer { text-align: center; padding: 24px; color: var(--muted); font-size: 12px;
+           border-top: 1px solid var(--border); margin-top: 40px; }
+
+  /* ── Responsive ── */
+  @media (max-width: 600px) {
+    header { padding: 0 14px; }
+    .container { padding: 16px 12px; }
+    .toolbar { flex-direction: column; align-items: flex-start; }
+    .toolbar-right { width: 100%; justify-content: flex-start; }
+    .metric .val { font-size: 18px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo"><span>SEE</span> Prezzi Energia 2026</div>
+  <div id="last-update">Caricamento...</div>
+</header>
+
+<div class="container">
+
+  <!-- Tab bar -->
+  <div class="tab-bar" id="tab-bar">
+    <button class="tab-btn active" onclick="showTab('EEX_Power')">EEX Power</button>
+    <button class="tab-btn" onclick="showTab('EEX_Trim')">EEX Trimestrali</button>
+    <button class="tab-btn" onclick="showTab('PUN')">PUN</button>
+    <button class="tab-btn" onclick="showTab('PSV')">PSV Gas</button>
+    <button class="tab-btn" onclick="showTab('IG_GME')">IG Index GME</button>
+    <button class="tab-btn" onclick="showTab('EEX_Gas')">EEX Gas</button>
+  </div>
+
+  <!-- Metric cards -->
+  <div class="metrics" id="metrics-row"></div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="toolbar-left">
+      <label style="color:var(--muted);font-size:12px">Mese:</label>
+      <select id="sel-mese" onchange="aggiorna()">
+        <option value="">Tutti i mesi</option>
+      </select>
+    </div>
+    <div class="toolbar-right">
+      <div class="view-toggle">
+        <button class="vt-btn active" id="btn-grafico" onclick="setView('grafico')">
+          <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5">
+            <polyline points="1,10 4,6 7,8 10,3 12,5"/>
+          </svg>Grafico
+        </button>
+        <button class="vt-btn" id="btn-tabella" onclick="setView('tabella')">
+          <svg viewBox="0 0 13 13" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="1" y="1" width="11" height="11" rx="1"/>
+            <line x1="1" y1="4.5" x2="12" y2="4.5"/>
+            <line x1="1" y1="8" x2="12" y2="8"/>
+            <line x1="5" y1="1" x2="5" y2="12"/>
+          </svg>Tabella
+        </button>
+      </div>
+      <button class="btn-exp btn-mail" onclick="esportaMail()">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5">
+          <rect x="1" y="3" width="14" height="10" rx="1.5"/>
+          <path d="M1 4l7 5 7-5"/>
+        </svg>Email
+      </button>
+      <button class="btn-exp btn-wa" onclick="esportaWA()">
+        <svg viewBox="0 0 16 16" fill="currentColor">
+          <path d="M8 1C4.134 1 1 4.134 1 8c0 1.386.382 2.682 1.045 3.785L1 15l3.326-1.027A6.953 6.953 0 008 15c3.866 0 7-3.134 7-7s-3.134-7-7-7zm3.394 9.725c-.152.428-.882.82-1.222.867-.31.043-.703.06-1.134-.072-.262-.083-.599-.192 0-.192-1.04-.404-2.695-1.578-3.74-3.56-.261-.497-.43-1.02-.44-1.507-.009-.493.136-.947.438-1.266.125-.131.26-.163.347-.166l.248-.006c.08-.002.188-.02.293.222.11.254.373.915.407.98.034.067.056.144.012.232-.044.089-.067.143-.133.22-.067.078-.14.174-.2.234-.067.067-.136.14-.058.274.077.133.344.567.738.918.507.452 1.038.7 1.235.786.131.058.218.046.3-.034.083-.079.35-.408.444-.548.094-.14.189-.117.317-.07.128.046.816.384.956.454.14.07.233.104.267.162.034.058.034.337-.117.765z"/>
+        </svg>WhatsApp
+      </button>
+    </div>
+  </div>
+
+  <!-- Legend (solo EEX_Trim) -->
+  <div class="legend" id="legend" style="display:none">
+    <span><span class="legend-dot" style="background:#4f8ef7"></span>Q1 — 1° Trim.</span>
+    <span><span class="legend-dot" style="background:#e07f3a"></span>Q2 — 2° Trim.</span>
+    <span><span class="legend-dot" style="background:#4aaa6b"></span>Q3 — 3° Trim.</span>
+    <span><span class="legend-dot" style="background:#a855c8"></span>Q4 — 4° Trim.</span>
+    <span><span class="legend-dot" style="background:#888"></span>Calendar</span>
+  </div>
+
+  <!-- Vista grafico -->
+  <div id="view-grafico">
+    <div class="chart-wrap">
+      <canvas id="myChart" role="img" aria-label="Grafico prezzi energia">Grafico prezzi energia.</canvas>
+    </div>
+  </div>
+
+  <!-- Vista tabella -->
+  <div id="view-tabella" style="display:none">
+    <div class="tbl-wrap">
+      <table>
+        <thead id="tbl-head"></thead>
+        <tbody id="tbl-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Stato loading/errore -->
+  <div id="view-status" style="display:none"></div>
+
+</div>
+
+<footer>
+  SEE Italia — Database Prezzi Energia 2026 &nbsp;|&nbsp;
+  Dati aggiornati automaticamente da <code>Aggiorna_Prezzi_Sheets.py</code>
+</footer>
+
+<script>
+// ============================================================
+// CONFIGURAZIONE — modifica SHEET_ID con l'ID del tuo foglio
+// ============================================================
+const SHEET_ID = "INSERISCI_QUI_ID_GOOGLE_SHEET";
+
+// URL base per leggere ogni tab come CSV (richiede foglio pubblico
+// o con accesso "Chiunque abbia il link può visualizzare")
+const CSV_BASE = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=`;
+
+// Configurazione dei tab
+const TABS = {
+  EEX_Power:  { label: "EEX Power 2026 (Calendar)", colore: "#4f8ef7", tipo: "simple",   unitaMisura: "€/MWh" },
+  EEX_Trim:   { label: "EEX Power 2026 (Trimestrali)", colore: "#888",  tipo: "trim",     unitaMisura: "€/MWh" },
+  PUN:        { label: "PUN 2026",                     colore: "#e05252", tipo: "simple",  unitaMisura: "€/MWh" },
+  PSV:        { label: "PSV Gas 2026 per 2027",        colore: "#4aaa6b", tipo: "simple", unitaMisura: "€/MWh" },
+  IG_GME:     { label: "IG Index GME 2026",            colore: "#a855c8", tipo: "simple", unitaMisura: "€/MWh" },
+  EEX_Gas:    { label: "EEX Gas 2026 per 2027",        colore: "#e07f3a", tipo: "simple", unitaMisura: "€/MWh" },
+};
+
+const TRIM_COLORS = ["#4f8ef7","#e07f3a","#4aaa6b","#a855c8","#888888"];
+const TRIM_LABELS = ["Q1","Q2","Q3","Q4","Calendar"];
+
+// ============================================================
+// STATO
+// ============================================================
+let tabCorrente = "EEX_Power";
+let vista       = "grafico";
+let cache       = {};         // { tabName: [{data,mese,giorno,...}] }
+let chartInst   = null;
+let righeViste  = [];         // righe filtrate per il tab/mese corrente
+
+// ============================================================
+// PARSING CSV
+// ============================================================
+function parseCSV(testo) {
+  const righe = testo.trim().split("\n");
+  const intestazione = righeCSV(righe[0]);
+  return righe.slice(1).map(r => {
+    const vals = righeCSV(r);
+    const obj = {};
+    intestazione.forEach((k, i) => { obj[k] = vals[i] || ""; });
+    return obj;
+  }).filter(r => r["Data"] && r["Data"] !== "");
+}
+
+function righeCSV(riga) {
+  // Parser CSV semplice (gestisce virgolette)
+  const out = [];
+  let corrente = "", inQuote = false;
+  for (let i = 0; i < riga.length; i++) {
+    const c = riga[i];
+    if (c === '"') { inQuote = !inQuote; }
+    else if (c === ',' && !inQuote) { out.push(corrente.trim()); corrente = ""; }
+    else { corrente += c; }
+  }
+  out.push(corrente.trim());
+  return out;
+}
+
+function toNum(v) {
+  const n = parseFloat(String(v).replace(",", "."));
+  return isNaN(n) ? null : n;
+}
+
+// ============================================================
+// CARICAMENTO DATI DA GOOGLE SHEETS
+// ============================================================
+async function caricaTab(tabName) {
+  if (cache[tabName]) return cache[tabName];
+
+  const url = CSV_BASE + encodeURIComponent(tabName);
+  const resp = await fetch(url);
+  if (!resp.ok) throw new Error(`HTTP ${resp.status} per tab ${tabName}`);
+  const testo = await resp.text();
+  const righe = parseCSV(testo);
+  cache[tabName] = righe;
+  return righe;
+}
+
+// ============================================================
+// FILTRO MESI
+// ============================================================
+function getMesi(righe) {
+  const ordine = ["Gennaio","Febbraio","Marzo","Aprile","Maggio","Giugno",
+                  "Luglio","Agosto","Settembre","Ottobre","Novembre","Dicembre"];
+  const seen = new Set();
+  righe.forEach(r => seen.add(cap(r["Mese"])));
+  return ordine.filter(m => seen.has(m));
+}
+
+function cap(s) {
+  if (!s) return "";
+  return s.charAt(0).toUpperCase() + s.slice(1).toLowerCase();
+}
+
+function filtraRighe(righe, mese) {
+  if (!mese) return righe;
+  return righe.filter(r => cap(r["Mese"]) === mese);
+}
+
+// ============================================================
+// STATISTICHE
+// ============================================================
+function calcStats(vals) {
+  const v = vals.filter(x => x !== null && !isNaN(x));
+  if (!v.length) return { min: 0, max: 0, avg: 0, ultimo: 0 };
+  return {
+    min:    Math.min(...v),
+    max:    Math.max(...v),
+    avg:    v.reduce((a, b) => a + b, 0) / v.length,
+    ultimo: v[v.length - 1],
+  };
+}
+
+function renderMetrics(vals, unitaMisura) {
+  const s = calcStats(vals);
+  const el = document.getElementById("metrics-row");
+  el.innerHTML = [
+    ["Minimo",  s.min],
+    ["Massimo", s.max],
+    ["Media",   s.avg],
+    ["Ultimo",  s.ultimo],
+  ].map(([lbl, v]) => `
+    <div class="metric">
+      <div class="lbl">${lbl}</div>
+      <div class="val">${v.toFixed(2)}</div>
+      <div class="unit">${unitaMisura}</div>
+    </div>`).join("");
+}
+
+// ============================================================
+// GRAFICO
+// ============================================================
+function renderGrafico(righe, cfg) {
+  const labels = righe.map(r => `${cap(r["Mese"])} ${r["Giorno"]}`);
+  let datasets;
+
+  if (cfg.tipo === "trim") {
+    const keys = ["Q1_EuroMWh","Q2_EuroMWh","Q3_EuroMWh","Q4_EuroMWh","Calendar_EuroMWh"];
+    datasets = TRIM_LABELS.map((n, i) => ({
+      label: n,
+      data: righe.map(r => toNum(r[keys[i]])),
+      borderColor: TRIM_COLORS[i],
+      backgroundColor: "transparent",
+      borderWidth: 2,
+      pointRadius: 2,
+      tension: 0.3,
+      borderDash: i === 4 ? [5, 3] : [],
+    }));
+  } else {
+    const chiave = Object.keys(righe[0] || {}).find(k =>
+      k.endsWith("_EuroMWh") && !["Mese","Giorno","Data"].includes(k)
+    ) || "";
+    datasets = [{
+      label: cfg.label,
+      data: righe.map(r => toNum(r[chiave])),
+      borderColor: cfg.colore,
+      backgroundColor: cfg.colore + "22",
+      borderWidth: 2,
+      pointRadius: 2,
+      tension: 0.3,
+    }];
+  }
+
+  if (chartInst) chartInst.destroy();
+  const ctx = document.getElementById("myChart");
+  chartInst = new Chart(ctx, {
+    type: "line",
+    data: { labels, datasets },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y?.toFixed(2)} €/MWh` } },
+      },
+      scales: {
+        x: { ticks: { color: "#8b90a0", font: { size: 11 }, maxRotation: 45,
+                      autoSkip: true, maxTicksLimit: 14 },
+             grid: { color: "rgba(255,255,255,0.06)" } },
+        y: { ticks: { color: "#8b90a0", font: { size: 11 } },
+             grid: { color: "rgba(255,255,255,0.06)" },
+             title: { display: true, text: "€/MWh", color: "#8b90a0", font: { size: 11 } } },
+      },
+    },
+  });
+}
+
+// ============================================================
+// TABELLA
+// ============================================================
+function renderTabella(righe, cfg) {
+  const head = document.getElementById("tbl-head");
+  const body = document.getElementById("tbl-body");
+
+  if (cfg.tipo === "trim") {
+    head.innerHTML = `<tr>
+      <th>Mese</th><th>Giorno</th>
+      <th class="num">Q1</th><th class="num">Q2</th>
+      <th class="num">Q3</th><th class="num">Q4</th><th class="num">Calendar</th>
+    </tr>`;
+    const keys = ["Q1_EuroMWh","Q2_EuroMWh","Q3_EuroMWh","Q4_EuroMWh","Calendar_EuroMWh"];
+    body.innerHTML = righe.map(r => `<tr>
+      <td>${cap(r["Mese"])}</td><td>${r["Giorno"]}</td>
+      ${keys.map(k => `<td class="num">${toNum(r[k])?.toFixed(2) ?? "—"}</td>`).join("")}
+    </tr>`).join("");
+  } else {
+    const chiave = Object.keys(righe[0] || {}).find(k =>
+      k.endsWith("_EuroMWh") && !["Mese","Giorno","Data"].includes(k)
+    ) || "";
+    head.innerHTML = `<tr>
+      <th>Mese</th><th>Giorno</th><th class="num">€/MWh</th><th class="num">Var.</th>
+    </tr>`;
+    body.innerHTML = righe.map((r, i) => {
+      const v = toNum(r[chiave]);
+      const prev = i > 0 ? toNum(righe[i-1][chiave]) : null;
+      let varHtml = `<td class="num flat">—</td>`;
+      if (prev !== null && v !== null) {
+        const d = v - prev;
+        const cls = d > 0 ? "up" : d < 0 ? "down" : "flat";
+        const sign = d >= 0 ? "+" : "";
+        varHtml = `<td class="num ${cls}">${sign}${d.toFixed(2)}</td>`;
+      }
+      return `<tr>
+        <td>${cap(r["Mese"])}</td>
+        <td>${r["Giorno"]}</td>
+        <td class="num">${v?.toFixed(2) ?? "—"}</td>
+        ${varHtml}
+      </tr>`;
+    }).join("");
+  }
+}
+
+// ============================================================
+// AGGIORNAMENTO UI PRINCIPALE
+// ============================================================
+async function aggiorna() {
+  const mese = document.getElementById("sel-mese").value;
+  const cfg  = TABS[tabCorrente];
+
+  mostraStatus("loading");
+
+  try {
+    const righe = await caricaTab(tabCorrente);
+
+    // Popola select mesi (se non già fatto per questo tab)
+    const selMese = document.getElementById("sel-mese");
+    const meseCorrente = selMese.value;
+    while (selMese.options.length > 1) selMese.remove(1);
+    getMesi(righe).forEach(m => {
+      const o = document.createElement("option");
+      o.value = m; o.textContent = m;
+      selMese.appendChild(o);
+    });
+    if (meseCorrente) selMese.value = meseCorrente;
+
+    righeViste = filtraRighe(righe, selMese.value);
+
+    // Metriche (usa la prima colonna valore per simple, Calendar per trim)
+    let valsMetrica;
+    if (cfg.tipo === "trim") {
+      valsMetrica = righeViste.map(r => toNum(r["Calendar_EuroMWh"]));
+    } else {
+      const chiave = Object.keys(righeViste[0] || {}).find(k =>
+        k.endsWith("_EuroMWh") && !["Mese","Giorno","Data"].includes(k)) || "";
+      valsMetrica = righeViste.map(r => toNum(r[chiave]));
+    }
+    renderMetrics(valsMetrica, cfg.unitaMisura);
+
+    // Legend EEX_Trim
+    document.getElementById("legend").style.display =
+      tabCorrente === "EEX_Trim" && vista === "grafico" ? "flex" : "none";
+
+    // Render vista
+    nascondiStatus();
+    if (vista === "grafico") {
+      renderGrafico(righeViste, cfg);
+    } else {
+      renderTabella(righeViste, cfg);
+    }
+
+  } catch (err) {
+    console.error(err);
+    mostraStatus("error", err.message);
+  }
+}
+
+// ============================================================
+// CAMBIO TAB
+// ============================================================
+function showTab(nome) {
+  tabCorrente = nome;
+  cache = {}; // resetta cache per ricaricare
+
+  // Aggiorna stile tab
+  document.querySelectorAll(".tab-btn").forEach((btn, i) => {
+    const tKeys = Object.keys(TABS);
+    btn.classList.toggle("active", tKeys[i] === nome);
+  });
+
+  // Resetta select mese
+  const sel = document.getElementById("sel-mese");
+  while (sel.options.length > 1) sel.remove(1);
+  sel.value = "";
+
+  aggiorna();
+}
+
+// ============================================================
+// CAMBIO VISTA
+// ============================================================
+function setView(v) {
+  vista = v;
+  document.getElementById("view-grafico").style.display = v === "grafico" ? "block" : "none";
+  document.getElementById("view-tabella").style.display = v === "tabella" ? "block" : "none";
+  document.getElementById("btn-grafico").classList.toggle("active", v === "grafico");
+  document.getElementById("btn-tabella").classList.toggle("active", v === "tabella");
+  document.getElementById("legend").style.display =
+    tabCorrente === "EEX_Trim" && v === "grafico" ? "flex" : "none";
+  aggiorna();
+}
+
+// ============================================================
+// STATUS
+// ============================================================
+function mostraStatus(tipo, msg) {
+  const el = document.getElementById("view-status");
+  document.getElementById("view-grafico").style.display = "none";
+  document.getElementById("view-tabella").style.display = "none";
+  el.style.display = "block";
+
+  if (tipo === "loading") {
+    el.innerHTML = `<div class="status"><div class="spinner"></div>
+      <p>Caricamento dati da Google Sheets...</p></div>`;
+  } else {
+    el.innerHTML = `<div class="status">
+      <div class="icon">⚠</div>
+      <p>Errore nel caricamento dei dati.</p>
+      <p style="font-size:12px;margin-top:8px;color:#666">${msg || ""}</p>
+      <p style="font-size:12px;margin-top:8px">Verifica che il foglio sia pubblico e che SHEET_ID sia corretto.</p>
+    </div>`;
+  }
+}
+
+function nascondiStatus() {
+  document.getElementById("view-status").style.display = "none";
+  if (vista === "grafico") {
+    document.getElementById("view-grafico").style.display = "block";
+  } else {
+    document.getElementById("view-tabella").style.display = "block";
+  }
+}
+
+// ============================================================
+// ESPORTAZIONE
+// ============================================================
+function buildTesto(plain) {
+  const cfg   = TABS[tabCorrente];
+  const label = cfg.label;
+  const righe = righeViste;
+  if (!righe.length) return "";
+
+  let vals;
+  if (cfg.tipo === "trim") {
+    vals = righe.map(r => toNum(r["Calendar_EuroMWh"])).filter(v => v !== null);
+  } else {
+    const chiave = Object.keys(righe[0]).find(k => k.endsWith("_EuroMWh")) || "";
+    vals = righe.map(r => toNum(r[chiave])).filter(v => v !== null);
+  }
+  const min  = Math.min(...vals).toFixed(2);
+  const max  = Math.max(...vals).toFixed(2);
+  const avg  = (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2);
+  const data = new Date().toLocaleDateString("it-IT");
+
+  if (plain) {
+    let corpo = "";
+    if (cfg.tipo === "trim") {
+      corpo = "Giorno             Q1       Q2       Q3       Q4      Cal\n";
+      righe.forEach(r => {
+        const g = `${cap(r["Mese"])} ${r["Giorno"]}`.padEnd(16);
+        const nums = ["Q1_EuroMWh","Q2_EuroMWh","Q3_EuroMWh","Q4_EuroMWh","Calendar_EuroMWh"]
+          .map(k => (toNum(r[k]) ?? 0).toFixed(2).padStart(7)).join(" ");
+        corpo += `${g} ${nums}\n`;
+      });
+    } else {
+      const chiave = Object.keys(righe[0]).find(k => k.endsWith("_EuroMWh")) || "";
+      righe.forEach((r, i) => {
+        const v = toNum(r[chiave]);
+        const prev = i > 0 ? toNum(righe[i-1][chiave]) : null;
+        const va = prev !== null && v !== null
+          ? ` (${v >= prev ? "+" : ""}${(v - prev).toFixed(2)})` : "";
+        corpo += `${cap(r["Mese"])} ${String(r["Giorno"]).padStart(2)}: ${v?.toFixed(2)} €/MWh${va}\n`;
+      });
+    }
+    return `${label}\n${data}\nMin: ${min} | Max: ${max} | Media: ${avg} €/MWh\n${"─".repeat(40)}\n${corpo}`;
+  } else {
+    let corpo = "";
+    if (cfg.tipo === "trim") {
+      corpo = righe.map(r => {
+        const keys = ["Q1_EuroMWh","Q2_EuroMWh","Q3_EuroMWh","Q4_EuroMWh","Calendar_EuroMWh"];
+        const nums = TRIM_LABELS.map((n, i) => `${n}:${(toNum(r[keys[i]]) ?? 0).toFixed(2)}`).join(" ");
+        return `${cap(r["Mese"])} ${r["Giorno"]} — ${nums}`;
+      }).join("\n");
+    } else {
+      const chiave = Object.keys(righe[0]).find(k => k.endsWith("_EuroMWh")) || "";
+      corpo = righe.map((r, i) => {
+        const v = toNum(r[chiave]);
+        const prev = i > 0 ? toNum(righe[i-1][chiave]) : null;
+        const va = prev !== null && v !== null
+          ? ` (${v >= prev ? "+" : ""}${(v - prev).toFixed(2)})` : "";
+        return `${cap(r["Mese"])} ${r["Giorno"]}: *${v?.toFixed(2)}* €/MWh${va}`;
+      }).join("\n");
+    }
+    return `*${label}*\n_${data}_\nMin: ${min} | Max: ${max} | Media: ${avg} €/MWh\n\n${corpo}`;
+  }
+}
+
+function esportaMail() {
+  const testo  = buildTesto(true);
+  const cfg    = TABS[tabCorrente];
+  const sogg   = encodeURIComponent(`Prezzi energia — ${cfg.label} — ${new Date().toLocaleDateString("it-IT")}`);
+  window.location.href = `mailto:?subject=${sogg}&body=${encodeURIComponent(testo)}`;
+}
+
+function esportaWA() {
+  const testo = buildTesto(false);
+  window.open("https://wa.me/?text=" + encodeURIComponent(testo), "_blank");
+}
+
+// ============================================================
+// AVVIO
+// ============================================================
+
+// Legge il tab _Aggiornamento per mostrare il timestamp
+async function leggiTimestamp() {
+  try {
+    const url = CSV_BASE + encodeURIComponent("_Aggiornamento");
+    const resp = await fetch(url);
+    if (!resp.ok) return;
+    const testo = await resp.text();
+    const righe = parseCSV(testo);
+    const riga  = righe.find(r => r["Parametro"] === "Ultimo aggiornamento");
+    if (riga) {
+      document.getElementById("last-update").textContent =
+        "Aggiornato: " + riga["Valore"];
+    }
+  } catch (_) { /* silenzioso */ }
+}
+
+window.addEventListener("load", () => {
+  leggiTimestamp();
+  aggiorna();
+});
+</script>
+</body>
+</html>
